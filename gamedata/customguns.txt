@@ -1,15 +1,14 @@
 "Games"
 {
-	"hl2mp"
+	"fof"
 	{
 		"Offsets"
 		{
 			// void CHL2MP_Player::FireBullets ( const FireBulletsInfo_t &info )
 			"FireBullets"
 			{
-				"windows"	"112"
-				"linux"		"113"
-				"mac"		"113"
+				"linux"		"108"
+				"mac"		"108"
 			}	
 			// Activity CBaseCombatCharacter::Weapon_TranslateActivity( Activity baseAct, bool *pRequired )
 			"Weapon_TranslateActivity"
@@ -49,9 +48,8 @@
 			// bool CHL2MP_Player::Weapon_Switch( CBaseCombatWeapon *pWeapon, int viewmodelindex = 0)
 			"Weapon_Switch"
 			{
-				"windows"	"264"
-				"linux"		"265"
-				"mac"		"265"
+				"linux"		"261"
+				"mac"		"261"
 			}
 			// void CBasePlayer::Weapon_Equip( CBaseCombatWeapon *pWeapon )
 			"Weapon_Equip"
@@ -189,9 +187,8 @@
 			// void CHL2MP_Player::SetAnimation( PLAYER_ANIM playerAnim )
 			"SetAnimation"
 			{
-				"windows"	"365"
-				"linux"		"366"
-				"mac"		"366"
+				"linux"		"362"
+				"mac"		"362"
 			}
 			// void CBaseCombatWeapon::SetViewModel()
 			"SetViewModel"
