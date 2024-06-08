@@ -8,11 +8,13 @@ loadConfig()
 	DirectoryListing dir = OpenDirectory("scripts/", true);
 	if (dir)
 	{
+		PrintToServer("Found weapon scripts directory");
 		char buffer[PLATFORM_MAX_PATH];
 		char filename[PLATFORM_MAX_PATH];
 		FileType type;
 		while (dir.GetNext(filename, sizeof(filename), type))
 		{
+			//PrintToServer("Found file: %s", filename);
 			if (type == FileType_File)
 			{
 				if (StrContains(filename, "weapon_", false) == 0 && StrEqual(filename[strlen(filename) - 3], "txt", false))

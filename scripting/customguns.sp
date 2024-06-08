@@ -19,6 +19,10 @@
 
 #define PLUGIN_VERSION "1.7"
 
+#define DEBUG
+#pragma semicolon 1
+//#define DEBUG
+
 public Plugin myinfo =
 {
 	name = "Custom guns",
@@ -392,10 +396,10 @@ public OnPluginStart()
 
 	CreateConVar("hl2dm_customguns_version", PLUGIN_VERSION, "Customguns version", FCVAR_SPONLY | FCVAR_REPLICATED | FCVAR_NOTIFY);
 	customguns_default = CreateConVar("customguns_default", "weapon_hands", "The preferred custom weapon that players should spawn with");
-	customguns_global_switcher = CreateConVar("customguns_global_switcher", "1", "Enables fast switching from any weapon by holding reload button. If 0, players can switch only when holding a custom weapon.", _, true, 0.0, true, 1.0);
+	//customguns_global_switcher = CreateConVar("customguns_global_switcher", "1", "Enables fast switching from any weapon by holding reload button. If 0, players can switch only when holding a custom weapon.", _, true, 0.0, true, 1.0);
 	customguns_order_alphabetically = CreateConVar("customguns_order_alphabetically", "1", "If enabled, orders weapons by name in the menu, rather than the order they were picked up. Only applies to dynamic wheel mode", _, true, 0.0, true, 1.0);
-	customguns_autogive = CreateConVar("customguns_autogive", "1", "Globally enables/disables auto-giving of all custom weapons", _, true, 0.0, true, 1.0);
-	customguns_static_wheel = CreateConVar("customguns_static_wheel", "1", "Enables stationary item placement in the radial menu (1) versus dynamic placement and resizing (0)", _, true, 0.0, true, 1.0);
+	customguns_autogive = CreateConVar("customguns_autogive", "0", "Globally enables/disables auto-giving of all custom weapons", _, true, 0.0, true, 1.0);
+	customguns_static_wheel = CreateConVar("customguns_static_wheel", "0", "Enables stationary item placement in the radial menu (1) versus dynamic placement and resizing (0)", _, true, 0.0, true, 1.0);
 	HookConVarChange(customguns_static_wheel, WheelModeChanged);
 
 	PrimaryAttackForward = CreateGlobalForward("CG_OnPrimaryAttack", ET_Ignore, Param_Cell, Param_Cell);
@@ -414,6 +418,7 @@ public OnPluginStart()
 	{
 		if (IsClientInGame(i))
 		{
+			PrintToServer("[CG] PLUGIN RESTARTED, ABOUT TO GIVE STUFF TO CLIENT");
 			OnClientPutInServer(i);
 			if (!IsFakeClient(i) && IsPlayerAlive(i))
 			{
@@ -428,7 +433,7 @@ public OnPluginEnd()
 {
 	for (int i = 1; i <= MaxClients; i++)
 		if (IsClientInGame(i))
-			removeCustomWeapon(i)
+			removeCustomWeapon(i);
 }
 
 public Action SeqTest(int client, int args)
@@ -623,6 +628,7 @@ public Action tGiveCustomGun(Handle timer, any userid)
 */
 stock giveCustomGun(client, int index = -1, bool switchTo = false)
 {
+	PrintToServer("giveCustomGun(%N, %d, %d)", client, index, switchTo);
 	if (GetArraySize(gunClassNames) > 0)
 	{
 		if (index == -1)
@@ -755,52 +761,54 @@ int spawnGun(int index, const float origin[3] = NULL_VECTOR)
 
 public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float angles[3], &weapon, &subtype, &cmdnum, &tickcount, &seed, mouse[2])
 {
-	if (!IsFakeClient(client))
-	{
-		char sWeapon[32];
-		GetClientWeapon(client, sWeapon, sizeof(sWeapon));
-		int gunIndex = getIndex(sWeapon);
+	// I don't want to deal with the selection wheel, so I'm going to disable it
+	// if (!IsFakeClient(client))
+	// {
+	// 	char sWeapon[32];
+	// 	GetClientWeapon(client, sWeapon, sizeof(sWeapon));
+	// 	int gunIndex = getIndex(sWeapon);
 
-		// handle opening/closing menu
-		if (!open[client] && IsPlayerAlive(client) && !zooming(client) && inventory[client] && GetArraySize(inventory[client]) > 0 && GetEntProp(client, Prop_Send, "m_iTeamNum") != 1)
-		{
-			if (buttons & IN_ATTACK3)
-			{
-				onMenuOpening(client);
-				open[client] = true;
-			}
-			else if (buttons & IN_RELOAD) {
-				if (!(!GetConVarBool(customguns_global_switcher) && gunIndex == -1))
-				{
-					if (!(GetEntProp(client, Prop_Data, "m_nOldButtons") & IN_RELOAD))
-					{
-						firstOpen[client] = GetGameTime();
-					}
-					else if (GetGameTime() >= firstOpen[client] + 0.25) {
-						// if (!StrEqual(sWeapon, "weapon_physcannon")) {
-						onMenuOpening(client);
-						open[client] = true;
-						//}
-					}
-				}
-			}
-		}
-		// if not holding any button or dead -> close the menu
-		else if (open[client] && (!(buttons & IN_ATTACK3) && !(buttons & IN_RELOAD)) || !IsPlayerAlive(client)) {
-			if (IsClientInGame(client) && IsPlayerAlive(client))
-			{
-				onMenuClosing(client);
-			}
-			open[client] = false;
-		}
+	// 	// handle opening/closing menu
+	// 	if (!open[client] && IsPlayerAlive(client) && !zooming(client) && inventory[client] && GetArraySize(inventory[client]) > 0 && GetEntProp(client, Prop_Send, "m_iTeamNum") != 1)
+	// 	{
+	// 		if (buttons & IN_ATTACK3)
+	// 		{
+	// 			onMenuOpening(client);
+	// 			open[client] = true;
+	// 		}
+	// 		else if (buttons & IN_RELOAD) {
+	// 			if (!(!GetConVarBool(customguns_global_switcher) && gunIndex == -1))
+	// 			{
+	// 				if (!(GetEntProp(client, Prop_Data, "m_nOldButtons") & IN_RELOAD))
+	// 				{
+	// 					firstOpen[client] = GetGameTime();
+	// 				}
+	// 				else if (GetGameTime() >= firstOpen[client] + 0.25) {
+	// 					// if (!StrEqual(sWeapon, "weapon_physcannon")) {
+	// 					onMenuOpening(client);
+	// 					open[client] = true;
+	// 					//}
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+	// 	// if not holding any button or dead -> close the menu
+	// 	else if (open[client] && (!(buttons & IN_ATTACK3) && !(buttons & IN_RELOAD)) || !IsPlayerAlive(client)) {
+	// 		if (IsClientInGame(client) && IsPlayerAlive(client))
+	// 		{
+	// 			onMenuClosing(client);
+	// 		}
+	// 		open[client] = false;
+	// 	}
 
-		if (open[client])
-		{
-			drawMenu(client);
-		}
+	// 	if (open[client])
+	// 	{
+	// 		drawMenu(client);
+	// 	}
 
-		// check scope
-		ScopeThink(client, buttons, gunIndex, open[client]);
-	}
+	// 	// check scope
+	// 	// Ignoring scope for now - BKR
+	// 	//ScopeThink(client, buttons, gunIndex, open[client]);
+	// }
 	return Plugin_Continue;
 }

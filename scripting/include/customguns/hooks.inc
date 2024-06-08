@@ -155,6 +155,7 @@ public MRESReturn AddViewKick(int weapon)
 */
 public MRESReturn FireBullets(int client, Handle hParams)
 {
+	PrintToChatAll("[CG HOOK] FireBullets");
 	// check if client is firing custom gun
 	if (selectedGunIndex[client] != -1 && gunEnt[client] != -1)
 	{
@@ -525,6 +526,7 @@ public MRESReturn Drop(int weapon)
 // bool CBaseCombatWeapon::Holster( CBaseCombatWeapon *pSwitchingTo )
 public MRESReturn Holster(int weapon, Handle hReturn, Handle hParams)
 {
+	PrintToServer("[CG HOOK] Holster");
 	// this makes minigun types play spinup animation when switched to while holding fire button. The game doesn't reset this itself for some reason..
 	SetEntPropFloat(weapon, Prop_Data, "m_fFireDuration", 0.0);
 

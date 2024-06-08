@@ -383,6 +383,8 @@ void createTrail(int throwable, int index, float origin[3])
 // void CBaseGrenade::Explode( trace_t *pTrace, int bitsDamageType )
 public MRESReturn Explode(int throwable, Handle hReturn, Handle hParams)
 {
+	// print to chat
+	PrintToChatAll("[CG HOOK] Explode");
 	int weapon = GetEntPropEnt(throwable, Prop_Send, "m_hEffectEntity");
 	if (IsValidEntity(weapon))
 	{
