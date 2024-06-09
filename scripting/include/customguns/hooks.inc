@@ -5,6 +5,7 @@
 
 public Action OnWeaponSwitch(client, weapon)
 {
+	PrintToServer("[CG HOOK] WeaponSwitch %d %d", client, weapon);
 	if (isCustom(weapon))
 	{
 		swapVM(client, false);
@@ -226,6 +227,7 @@ public MRESReturn Operator_HandleAnimEvent(int weapon, Handle hParams)
 // bool CBasePlayer::BumpWeapon( CBaseCombatWeapon *pWeapon )
 public MRESReturn BumpWeapon(int client, Handle hReturn, Handle hParams)
 {
+	PrintToServer("[CG HOOK] BumpWeapon");
 	int gun = DHookGetParam(hParams, 1);
 	int gunIndex = getIndexEnt(gun);
 
@@ -282,6 +284,7 @@ public MRESReturn BumpWeapon(int client, Handle hReturn, Handle hParams)
 // This is where we give new weapon because we run out of ammo
 public MRESReturn ReloadOrSwitchWeapons(int weapon, Handle hReturn)
 {
+	PrintToServer("[CG HOOK] ReloadOrSwitchWeapons");
 	int owner = GetOwner(weapon);
 	int prim = GetEntProp(weapon, Prop_Send, "m_iPrimaryAmmoType");
 	int sec = GetEntProp(weapon, Prop_Send, "m_iSecondaryAmmoType");
@@ -493,6 +496,7 @@ public MRESReturn PrimaryAttack(int weapon)
 // void CBaseCombatWeapon::SecondaryAttack( void )
 public MRESReturn SecondaryAttack(int weapon)
 {
+	PrintToServer("[CG HOOK] SecondaryAttack");
 	int client = GetOwner(weapon);
 	if (IsPlayer(client))
 	{
@@ -515,6 +519,7 @@ public MRESReturn SecondaryAttack(int weapon)
 // void CBaseCombatWeapon::Drop( const Vector &vecVelocity )
 public MRESReturn Drop(int weapon)
 {
+	PrintToServer("[CG HOOK] Drop");
 	int client = GetOwner(weapon);
 	if (IsPlayer(client))
 	{
@@ -565,6 +570,7 @@ public MRESReturn Holster(int weapon, Handle hReturn, Handle hParams)
 // void CBaseCombatWeapon:WeaponSound( WeaponSound_t sound_type, float soundtime = 0.0f )
 public MRESReturn WeaponSound(int weapon, Handle hParams)
 {
+	PrintToServer("[CG HOOK] WeaponSound");
 	int client = GetOwner(weapon);
 	if (IsPlayer(client) && selectedGunIndex[client] != -1)
 	{

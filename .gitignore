@@ -215,3 +215,10 @@ pip-log.txt
 #Mr Developer
 .mr.developer.cfg
 *.dat
+
+# Sourcemod stuff
+*:Zone.Identifier
+*.mdl
+*.vtx
+*.vvd
+*.phy

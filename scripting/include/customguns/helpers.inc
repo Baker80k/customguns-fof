@@ -512,6 +512,7 @@ public Action stopSound(Handle timer, any data)
 
 public Action deploySound(Handle timer, any data)
 {
+	PrintToServer("[CG HELPERS] deploySound")
 	if (IsValidEntity(data))
 	{
 		SDKCall(CALL_WeaponSound, data, DEPLOY, 0.0);

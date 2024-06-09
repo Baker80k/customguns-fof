@@ -396,7 +396,7 @@ public OnPluginStart()
 
 	CreateConVar("hl2dm_customguns_version", PLUGIN_VERSION, "Customguns version", FCVAR_SPONLY | FCVAR_REPLICATED | FCVAR_NOTIFY);
 	customguns_default = CreateConVar("customguns_default", "weapon_hands", "The preferred custom weapon that players should spawn with");
-	//customguns_global_switcher = CreateConVar("customguns_global_switcher", "1", "Enables fast switching from any weapon by holding reload button. If 0, players can switch only when holding a custom weapon.", _, true, 0.0, true, 1.0);
+	customguns_global_switcher = CreateConVar("customguns_global_switcher", "1", "Enables fast switching from any weapon by holding reload button. If 0, players can switch only when holding a custom weapon.", _, true, 0.0, true, 1.0);
 	customguns_order_alphabetically = CreateConVar("customguns_order_alphabetically", "1", "If enabled, orders weapons by name in the menu, rather than the order they were picked up. Only applies to dynamic wheel mode", _, true, 0.0, true, 1.0);
 	customguns_autogive = CreateConVar("customguns_autogive", "0", "Globally enables/disables auto-giving of all custom weapons", _, true, 0.0, true, 1.0);
 	customguns_static_wheel = CreateConVar("customguns_static_wheel", "0", "Enables stationary item placement in the radial menu (1) versus dynamic placement and resizing (0)", _, true, 0.0, true, 1.0);
@@ -657,8 +657,10 @@ stock giveCustomGun(client, int index = -1, bool switchTo = false)
 			EquipPlayerWeapon(client, ent);
 			if (switchTo)
 			{
+				PrintToServer("Switching to weapon %d", ent);
 				SDKCall(CALL_Weapon_Switch, client, ent, 0);
-				CreateTimer(0.1, deploySound, EntIndexToEntRef(ent));
+				PrintToServer("Switched to weapon %d", ent);
+				CreateTimer(0.1, deploySound, EntIndexToEntRef(ent)); // this probably isn't it - BKR
 			}
 		}
 		else {
@@ -666,6 +668,7 @@ stock giveCustomGun(client, int index = -1, bool switchTo = false)
 		}
 		CLIENT_BEING_EQUIPPED = -1;
 	}
+
 }
 
 int spawnGun(int index, const float origin[3] = NULL_VECTOR)
@@ -679,7 +682,10 @@ int spawnGun(int index, const float origin[3] = NULL_VECTOR)
 	// weapon_hl2mp_base : the same as above, flickers
 	// basehlcombatweapon : pretty good, but overshadowing with other weapons at slot 0,0
 	// weapon_cubemap : also good, but does not show stock ammo of player (pesky cubemap has -1 clips and no ammotype on client by default)
-	int ent = CreateEntityByName("weapon_cubemap");
+	//int ent = CreateEntityByName("weapon_cubemap");
+	PrintToServer("[CG] Attempting to spawn gun using entity name 'basehlcombatweapon'");
+	int ent = CreateEntityByName("basehlcombatweapon");
+	PrintToServer("[CG] Entity index: %d", ent);
 	if (ent != -1)
 	{
 		GunType guntype = GetArrayCell(gunType, index);
@@ -756,59 +762,63 @@ int spawnGun(int index, const float origin[3] = NULL_VECTOR)
 
 		TeleportEntity(ent, origin, NULL_VECTOR, NULL_VECTOR);
 	}
+	PrintToServer("[CG] Spawned gun index: %d", ent);
 	return ent;
 }
 
 public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float angles[3], &weapon, &subtype, &cmdnum, &tickcount, &seed, mouse[2])
 {
-	// I don't want to deal with the selection wheel, so I'm going to disable it
-	// if (!IsFakeClient(client))
-	// {
-	// 	char sWeapon[32];
-	// 	GetClientWeapon(client, sWeapon, sizeof(sWeapon));
-	// 	int gunIndex = getIndex(sWeapon);
+	//I don't want to deal with the selection wheel, so I'm going to disable it
+	if (!IsFakeClient(client))
+	{
+		char sWeapon[32];
+		GetClientWeapon(client, sWeapon, sizeof(sWeapon));
+		int gunIndex = getIndex(sWeapon);
 
-	// 	// handle opening/closing menu
-	// 	if (!open[client] && IsPlayerAlive(client) && !zooming(client) && inventory[client] && GetArraySize(inventory[client]) > 0 && GetEntProp(client, Prop_Send, "m_iTeamNum") != 1)
-	// 	{
-	// 		if (buttons & IN_ATTACK3)
-	// 		{
-	// 			onMenuOpening(client);
-	// 			open[client] = true;
-	// 		}
-	// 		else if (buttons & IN_RELOAD) {
-	// 			if (!(!GetConVarBool(customguns_global_switcher) && gunIndex == -1))
-	// 			{
-	// 				if (!(GetEntProp(client, Prop_Data, "m_nOldButtons") & IN_RELOAD))
-	// 				{
-	// 					firstOpen[client] = GetGameTime();
-	// 				}
-	// 				else if (GetGameTime() >= firstOpen[client] + 0.25) {
-	// 					// if (!StrEqual(sWeapon, "weapon_physcannon")) {
-	// 					onMenuOpening(client);
-	// 					open[client] = true;
-	// 					//}
-	// 				}
-	// 			}
-	// 		}
-	// 	}
-	// 	// if not holding any button or dead -> close the menu
-	// 	else if (open[client] && (!(buttons & IN_ATTACK3) && !(buttons & IN_RELOAD)) || !IsPlayerAlive(client)) {
-	// 		if (IsClientInGame(client) && IsPlayerAlive(client))
-	// 		{
-	// 			onMenuClosing(client);
-	// 		}
-	// 		open[client] = false;
-	// 	}
+		// handle opening/closing menu
+		//if (!open[client] && IsPlayerAlive(client) && !zooming(client) && inventory[client] && GetArraySize(inventory[client]) > 0 && GetEntProp(client, Prop_Send, "m_iTeamNum") != 1)
+		if (!open[client] && IsPlayerAlive(client) && inventory[client] && GetArraySize(inventory[client]) > 0 && GetEntProp(client, Prop_Send, "m_iTeamNum") != 1)
+		{
+			if (buttons & IN_ATTACK3)
+			{
+				onMenuOpening(client);
+				open[client] = true;
+			}
+			else if (buttons & IN_RELOAD) {
+				if (!(!GetConVarBool(customguns_global_switcher) && gunIndex == -1))
+				{
+					if (!(GetEntProp(client, Prop_Data, "m_nOldButtons") & IN_RELOAD))
+					{
+						firstOpen[client] = GetGameTime();
+					}
+					else if (GetGameTime() >= firstOpen[client] + 0.25) {
+						// if (!StrEqual(sWeapon, "weapon_physcannon")) {
+						onMenuOpening(client);
+						open[client] = true;
+						//}
+					}
+				}
+			}
+		}
+		// if not holding any button or dead -> close the menu
+		else if (open[client] && (!(buttons & IN_ATTACK3) && !(buttons & IN_RELOAD)) || !IsPlayerAlive(client)) {
+			if (IsClientInGame(client) && IsPlayerAlive(client))
+			{
+				PrintToServer("Closing menu for %N", client);
+				onMenuClosing(client);
+				PrintToServer("Closed menu for %N", client);
+			}
+			open[client] = false;
+		}
 
-	// 	if (open[client])
-	// 	{
-	// 		drawMenu(client);
-	// 	}
+		if (open[client])
+		{
+			drawMenu(client);
+		}
 
-	// 	// check scope
-	// 	// Ignoring scope for now - BKR
-	// 	//ScopeThink(client, buttons, gunIndex, open[client]);
-	// }
+		// check scope
+		// Ignoring scope for now - BKR
+		//ScopeThink(client, buttons, gunIndex, open[client]);
+	}
 	return Plugin_Continue;
 }

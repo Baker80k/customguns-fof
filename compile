@@ -1,0 +1,20 @@
+# Pack custom content to server custom folder
+#$VPK -M a -f $SERVER_DIR/fof/customguns.vpk $PROJECT_DIR/customguns.txt $PROJECT_DIR/weapons.txt $PROJECT_DIR/models $PROJECT_DIR/materials $PROJECT_DIR/sound $PROJECT_DIR/scripts
+#if test -f "/mnt/f/SteamLibrary/steamapps/common/Fistful of Frags/sdk/bin/vpk.exe"; then
+#    echo "file exists"
+#fi
+# Remove all :Zone.Identifier files
+find ~/proj/sourcemod/customguns-fof/custom/Custom_Weapons -name '*:Zone.Identifier' -type f -delete
+find ~/proj/sourcemod/customguns-fof/custom/Custom_Weapons -name ':Zone.Identifier' -type f -delete
+VPK="/mnt/f/SteamLibrary/steamapps/common/Fistful of Frags/sdk/bin/vpk.exe"
+"$VPK" ~/proj/sourcemod/customguns-fof/custom/Custom_Weapons
+cp ~/proj/sourcemod/customguns-fof/custom/Custom_Weapons.vpk /home/baker/proj/sourcemod/servers/fof_server_wsl/fof/custom/Custom_Weapons.vpk
+rm "/mnt/f/SteamLibrary/steamapps/common/Fistful of Frags/fof/custom/custom_weapons.vpk.sound.cache"
+cp ~/proj/sourcemod/customguns-fof/custom/Custom_Weapons.vpk "/mnt/f/SteamLibrary/steamapps/common/Fistful of Frags/fof/custom"
+
+# Compile the plugin to server directory
+/home/baker/proj/sourcemod/servers/fof_server_wsl/fof/addons/sourcemod/scripting/spcomp ~/proj/sourcemod/customguns-fof/scripting/customguns.sp -o ~/proj/sourcemod/servers/fof_server_wsl/fof/addons/sourcemod/plugins/customguns.smx -i ~/proj/sourcemod/customguns-fof/scripting/include -i ~/proj/sourcemod/customguns-fof/scripting -i ~/proj/sourcemod/servers/fof_server_wsl/fof/addons/sourcemod/scripting/include -O2 -v2
+~/proj/sourcemod/servers/fof_server_wsl/fof/addons/sourcemod/scripting/spcomp ~/proj/sourcemod/customguns-fof/scripting/weapon_shovel.sp -o ~/proj/sourcemod/servers/fof_server_wsl/fof/addons/sourcemod/plugins/weapon_shovel.smx -i ~/proj/sourcemod/customguns-fof/scripting/include -i ~/proj/sourcemod/customguns-fof/scripting -i ~/proj/sourcemod/servers/fof_server_wsl/fof/addons/sourcemod/scripting/include -O2 -v2
+
+# Copy other files to server directory
+cp ~/proj/sourcemod/customguns-fof/gamedata/customguns.txt ~/proj/sourcemod/servers/fof_server_wsl/fof/addons/sourcemod/gamedata/
