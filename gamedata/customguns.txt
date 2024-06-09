@@ -14,9 +14,9 @@
 			// Activity CBaseCombatCharacter::Weapon_TranslateActivity( Activity baseAct, bool *pRequired )
 			"Weapon_TranslateActivity"
 			{
-				"windows"	"257"
-				"linux"		"258"
-				"mac"		"258"
+				"windows"	"258"
+				"linux"		"259"
+				"mac"		"259"
 			}
 			// float CBaseCombatWeapon::GetFireRate( void )
 			"GetFireRate"

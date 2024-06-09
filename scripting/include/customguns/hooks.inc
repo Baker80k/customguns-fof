@@ -20,6 +20,7 @@ public Action OnWeaponSwitch(client, weapon)
 
 public OnWeaponSwitchPost(client, weapon)
 {
+	PrintToServer("[CG HOOK] OnWeaponSwitchPost %d %d", client, weapon);
 	if (isCustom(weapon))
 	{
 		throwableReset(client);
@@ -70,6 +71,7 @@ public OnWeaponSwitchPost(client, weapon)
 
 public OnWeaponEquipPost(client, weapon)
 {
+	PrintToServer("[CG HOOK] OnWeaponEquipPost %d %d", client, weapon);
 	if (GetConVarBool(customguns_autogive))
 	{
 		char sWeapon[32];
@@ -99,6 +101,7 @@ public Action vmSwapDelay(Handle timer, any data)
 // Kind of a hack: If we're giving a weapon to player, override its default ammo with our saved ammo from inventory if any. Otherwise, do nothing.
 public MRESReturn GetDefaultClip1(int weapon, Handle hReturn)
 {
+	PrintToServer("[CG HOOK] GetDefaultClip1");
 	if (IsPlayer(CLIENT_BEING_EQUIPPED))
 	{
 		int gunIndex = getIndexEnt(weapon);
@@ -115,6 +118,7 @@ public MRESReturn GetDefaultClip1(int weapon, Handle hReturn)
 // float CBaseCombatWeapon::GetFireRate( void )
 public MRESReturn GetFireRate(int weapon, Handle hReturn)
 {
+	PrintToServer("[CG HOOK] GetFireRate");
 	DHookSetReturn(hReturn, GetArrayCell(gunRof, getIndexEnt(weapon)));
 	return MRES_Supercede;
 }
@@ -122,6 +126,7 @@ public MRESReturn GetFireRate(int weapon, Handle hReturn)
 // void CBaseCombatWeapon::AddViewKick( void )
 public MRESReturn AddViewKick(int weapon)
 {
+	PrintToServer("[CG HOOK] AddViewKick");
 	int client = GetOwner(weapon);
 	if (IsPlayer(client))
 	{
@@ -186,17 +191,18 @@ public MRESReturn FireBullets(int client, Handle hParams)
 // This is a fix to allow player model animations/poses for unknown guns
 public MRESReturn TranslateActivity(int client, Handle hReturn, Handle hParams)
 {
-	if (gunEnt[client] != -1 && selectedGunIndex[client] != -1)
-	{
-		char animPrefix[32];
-		GetArrayString(gunAnimPrefix, selectedGunIndex[client], animPrefix, sizeof(animPrefix));
-		Activity resolved = resolveAnimFor(animPrefix, DHookGetParam(hParams, 1));
-		if (resolved != ACT_INVALID)
-		{
-			DHookSetReturn(hReturn, resolved);
-			return MRES_Supercede;
-		}
-	}
+	// if (gunEnt[client] != -1 && selectedGunIndex[client] != -1)
+	// {
+	// 	PrintToServer("[CG HOOK] TranslateActivity, %d, %d", client, selectedGunIndex[client]);
+	// 	char animPrefix[32];
+	// 	GetArrayString(gunAnimPrefix, selectedGunIndex[client], animPrefix, sizeof(animPrefix));
+	// 	Activity resolved = resolveAnimFor(animPrefix, DHookGetParam(hParams, 1));
+	// 	if (resolved != ACT_INVALID)
+	// 	{
+	// 		DHookSetReturn(hReturn, resolved);
+	// 		return MRES_Supercede;
+	// 	}
+	// }
 	return MRES_Ignored;
 }
 
@@ -214,6 +220,7 @@ struct animevent_t
 // void CBaseCombatWeapon::Operator_HandleAnimEvent( animevent_t *pEvent, CBaseCombatCharacter *pOperator )
 public MRESReturn Operator_HandleAnimEvent(int weapon, Handle hParams)
 {
+	PrintToServer("[CG HOOK] Operator_HandleAnimEvent");
 	int client = DHookGetParam(hParams, 2);
 	if (IsPlayer(client))
 	{
@@ -336,6 +343,7 @@ public MRESReturn ReloadOrSwitchWeapons(int weapon, Handle hReturn)
 // bool CBaseCombatWeapon::Reload( void )
 public MRESReturn Reload(int weapon, Handle hReturn)
 {
+	PrintToServer("[CG HOOK] Reload");
 	if (DHookGetReturn(hReturn))
 	{
 		// fix reload sound not playing
@@ -354,6 +362,7 @@ public MRESReturn Reload(int weapon, Handle hReturn)
 // Handles spinup anim (fire delay) on appropriate guns by delaying next attack
 public MRESReturn ItemPostFrame(int weapon)
 {
+	// PrintToServer("[CG HOOK] ItemPostFrame"); This gets called all the time
 	int client = GetOwner(weapon);
 	if (IsPlayer(client))
 	{
@@ -367,6 +376,7 @@ public MRESReturn ItemPostFrame(int weapon)
 
 		if (type == GunType_Throwable)
 		{
+			PrintToServer("[CG HOOK] ItemPostFrame Throwable");
 			return Throwable_ItemPostFrame(weapon, index, client);
 		}
 		else if (type == GunType_Bullet)
@@ -396,6 +406,7 @@ public MRESReturn ItemPostFrame(int weapon)
 				{
 					if (!(buttons & IN_ATTACK) || GetEntPropFloat(weapon, Prop_Data, "m_fFireDuration") <= 0.0)
 					{  // spinup cancelled by player (unpressed button)
+						PrintToServer("[CG HOOK] ItemPostFrame Bullet SpinUp Cancelled")
 						SDKCall(CALL_StopWeaponSound, weapon, SPECIAL1);
 						SDKCall(CALL_SendWeaponAnim, weapon, ACT_VM_IDLE);
 						inSpinUp[client] = false;
@@ -411,6 +422,7 @@ public MRESReturn ItemPostFrame(int weapon)
 			{
 				if (!(buttons & IN_ATTACK))
 				{
+					PrintToServer("[CG HOOK] ItemPostFrame Bullet Semi-Auto")
 					SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", curtime - 0.1);
 				}
 			}
@@ -419,6 +431,7 @@ public MRESReturn ItemPostFrame(int weapon)
 		else if (!GetArrayCell(gunCustomKeepAmmo, index)) {
 			if ((GetClientButtons(client) & IN_ATTACK) && GetGameTime() > GetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack"))
 			{
+				PrintToServer("[CG HOOK] ItemPostFrame Custom PrimaryAttack")
 				Call_StartForward(PrimaryAttackForward);
 				Call_PushCell(client);
 				Call_PushCell(weapon);
@@ -426,6 +439,7 @@ public MRESReturn ItemPostFrame(int weapon)
 			}
 			else if ((GetClientButtons(client) & IN_ATTACK2) && GetGameTime() > GetEntPropFloat(weapon, Prop_Send, "m_flNextSecondaryAttack"))
 			{
+				PrintToServer("[CG HOOK] ItemPostFrame Custom SecondaryAttack")
 				Call_StartForward(SecondaryAttackForward);
 				Call_PushCell(client);
 				Call_PushCell(weapon);
@@ -440,6 +454,7 @@ public MRESReturn ItemPostFrame(int weapon)
 // Loop sound handler
 public MRESReturn ItemPostFramePost(int weapon)
 {
+	PrintToServer("[CG HOOK] ItemPostFramePost");
 	int client = GetOwner(weapon);
 	if (IsPlayer(client))
 	{
@@ -456,6 +471,7 @@ public MRESReturn ItemPostFramePost(int weapon)
 // void CBaseCombatWeapon::PrimaryAttack( void )
 public MRESReturn PrimaryAttack(int weapon)
 {
+	PrintToServer("[CG HOOK] PrimaryAttack");
 	int client = GetOwner(weapon);
 	if (IsPlayer(client))
 	{

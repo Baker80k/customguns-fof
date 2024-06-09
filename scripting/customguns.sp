@@ -33,6 +33,7 @@ public Plugin myinfo =
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, err_max)
 {
+	PrintToServer("[CG] AskPluginLoad2");
 	RegPluginLibrary("customguns");
 
 	CreateNative("CG_IsClientHoldingCustomGun", Native_IsClientHoldingCustomGun);
@@ -52,6 +53,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, err_max)
 
 public Native_GiveGun(Handle plugin, numParams)
 {
+	PrintToServer("[CG] Native_GiveGun");
 	int client = GetNativeCell(1);
 	char classname[32];
 	GetNativeString(2, classname, sizeof(classname));
@@ -60,12 +62,14 @@ public Native_GiveGun(Handle plugin, numParams)
 
 public Native_ClearInventory(Handle plugin, numParams)
 {
+	PrintToServer("[CG] Native_ClearInventory");
 	int client = GetNativeCell(1);
 	clearInventory(client, true);
 }
 
 public Native_SpawnGun(Handle plugin, numParams)
 {
+	PrintToServer("[CG] Native_SpawnGun");
 	char classname[32];
 	float origin[3];
 	GetNativeString(1, classname, sizeof(classname));
@@ -81,11 +85,13 @@ public Native_IsClientHoldingCustomGun(Handle plugin, numParams)
 
 public Native_SetPlayerAnimation(Handle plugin, numParams)
 {
+	PrintToServer("[CG] Native_SetPlayerAnimation");
 	SDKCall(CALL_SetAnimation, GetNativeCell(1), GetNativeCell(2));
 }
 
 public Native_GetShootPosition(Handle plugin, numParams)
 {
+	PrintToServer("[CG] Native_GetShootPosition");
 	int client = GetNativeCell(1);
 	float pos[3];
 	getShootPosition(client, pos);
@@ -105,6 +111,7 @@ public Native_GetShootPosition(Handle plugin, numParams)
 
 public int Native_PlayActivity(Handle plugin, numParams)
 {
+	PrintToServer("[CG] Native_PlayActivity");
 	int weapon = GetNativeCell(1);
 	Activity activity = GetNativeCell(2);
 	SDKCall(CALL_SendWeaponAnim, weapon, activity);
@@ -114,6 +121,7 @@ public int Native_PlayActivity(Handle plugin, numParams)
 
 public int Native_PlayPrimaryAttack(Handle plugin, numParams)
 {
+	PrintToServer("[CG] Native_PlayPrimaryAttack");
 	int weapon = GetNativeCell(1);
 	SDKCall(CALL_SendWeaponAnim, weapon, ACT_VM_PRIMARYATTACK);
 	float curtime = GetGameTime();
@@ -125,6 +133,7 @@ public int Native_PlayPrimaryAttack(Handle plugin, numParams)
 
 public int Native_PlaySecondaryAttack(Handle plugin, numParams)
 {
+	PrintToServer("[CG] Native_PlaySecondaryAttack");
 	int weapon = GetNativeCell(1);
 	SDKCall(CALL_SendWeaponAnim, weapon, ACT_VM_SECONDARYATTACK);
 	float curtime = GetGameTime();
@@ -136,11 +145,13 @@ public int Native_PlaySecondaryAttack(Handle plugin, numParams)
 
 public Native_RemovePlayerAmmo(Handle plugin, numParams)
 {
+	PrintToServer("[CG] Native_RemovePlayerAmmo");
 	RemovePlayerAmmo(GetNativeCell(1), GetNativeCell(2), GetNativeCell(3));
 }
 
 public Native_RadiusDamage(Handle plugin, numParams)
 {
+	PrintToServer("[CG] Native_RadiusDamage");
 	float origin[3];
 	GetNativeArray(6, origin, sizeof(origin));
 	RadiusDamageHack(GetNativeCell(1), GetNativeCell(2), GetNativeCell(3), GetNativeCell(4), GetNativeCell(5), origin, GetNativeCell(7), GetNativeCell(8));
@@ -159,8 +170,8 @@ public OnPluginStart()
 		SetFailState("Failed to find gamedata 'customguns'");
 	}
 
+	PrintToServer("[CG START] Setting up hooks");
 	int offset;
-
 	{
 		// void CBaseGrenade::Explode( CGameTrace *pTrace, int bitsDamageType ) // (trace_t)
 		offset = GameConfGetOffset(gamedata, "Explode");
@@ -253,6 +264,7 @@ public OnPluginStart()
 	/********** CALLS **********/
 	/***************************/
 
+	PrintToServer("[CG Start] Setting up SDK calls");
 	{
 		// bool CBaseCombatWeapon::SendWeaponAnim( int iActivity )
 		StartPrepSDKCall(SDKCall_Entity);
@@ -351,6 +363,8 @@ public OnPluginStart()
 	/***************************/
 	/********** SETUP **********/
 	/***************************/
+
+	PrintToServer("[CG Start] Final Setup");
 
 	gunClassNames = CreateArray(32);
 	gunNames = CreateArray(32);
@@ -504,6 +518,7 @@ public Action CustomGun(int client, int args)
 
 public OnConfigsExecuted()
 {
+	PrintToServer("[CG] OnConfigsExecuted");
 	precacheStyles();
 
 	PrecacheSound(SND_OPEN, true);
@@ -524,6 +539,7 @@ public OnConfigsExecuted()
 		GetArrayString(gunDownloads, i, buffer, sizeof(buffer));
 		AddFileToDownloadsTable(buffer);
 	}
+	PrintToServer("[CG] Finished precaching");
 }
 
 public OnClientPutInServer(int client)
@@ -660,7 +676,8 @@ stock giveCustomGun(client, int index = -1, bool switchTo = false)
 				PrintToServer("Switching to weapon %d", ent);
 				SDKCall(CALL_Weapon_Switch, client, ent, 0);
 				PrintToServer("Switched to weapon %d", ent);
-				CreateTimer(0.1, deploySound, EntIndexToEntRef(ent)); // this probably isn't it - BKR
+				// this probably isn't the present crash, but removing it anyway for now TODO put back in
+				//CreateTimer(0.1, deploySound, EntIndexToEntRef(ent));
 			}
 		}
 		else {
@@ -682,9 +699,11 @@ int spawnGun(int index, const float origin[3] = NULL_VECTOR)
 	// weapon_hl2mp_base : the same as above, flickers
 	// basehlcombatweapon : pretty good, but overshadowing with other weapons at slot 0,0
 	// weapon_cubemap : also good, but does not show stock ammo of player (pesky cubemap has -1 clips and no ammotype on client by default)
-	//int ent = CreateEntityByName("weapon_cubemap");
-	PrintToServer("[CG] Attempting to spawn gun using entity name 'basehlcombatweapon'");
-	int ent = CreateEntityByName("basehlcombatweapon");
+	// weapon_ifm_base : The one used for the tf2 fork, doesn't work here
+	//int ent = CreateEntityByName("weapon_cubemap"); // crashes
+	//int ent = CreateEntityByName("weapon_machete"); // this works but the animations get funky
+	//int ent = CreateEntityByName("weapon_annabelle"); // wanted to use this, crashes
+	int ent = CreateEntityByName("weapon_357");
 	PrintToServer("[CG] Entity index: %d", ent);
 	if (ent != -1)
 	{

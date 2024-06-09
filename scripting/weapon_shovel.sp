@@ -15,6 +15,7 @@ float additionalTime[MAXPLAYERS+1];
 float nextEnergy[MAXPLAYERS+1];
 
 public void CG_OnHolster(int client, int weapon, int switchingTo){
+	PrintToServer("[CG SHOVEL] CG_OnHolster");
 	char sWeapon[32];
 	GetEntityClassname(weapon, sWeapon, sizeof(sWeapon));
 	
@@ -25,6 +26,7 @@ public void CG_OnHolster(int client, int weapon, int switchingTo){
 }
 
 public void CG_OnPrimaryAttack(int client, int weapon){
+	PrintToServer("[CG SHOVEL] CG_OnPrimaryAttack");
 	char sWeapon[32];
 	GetEntityClassname(weapon, sWeapon, sizeof(sWeapon));
 	
@@ -109,6 +111,7 @@ public void CG_ItemPostFrame(int client, int weapon){
 	GetEntityClassname(weapon, sWeapon, sizeof(sWeapon));
 	
 	if(StrEqual(sWeapon, WEAPON)){
+		PrintToServer("[CG SHOVEL] CG_ItemPostFrame");
 		if(!(GetClientButtons(client) & IN_ATTACK) && GetGameTime() >= nextEnergy[client])
 		{
 			additionalTime[client] *= 0.5;
@@ -118,6 +121,7 @@ public void CG_ItemPostFrame(int client, int weapon){
 }
 
 public bool TraceEntityFilter(int entity, int mask, any data){
+	PrintToServer("[CG SHOVEL] TraceEntityFilter");
 	if (entity == data)
 		return false;
 	return true;

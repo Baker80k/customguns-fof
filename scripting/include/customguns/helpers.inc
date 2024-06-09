@@ -8,7 +8,7 @@ loadConfig()
 	DirectoryListing dir = OpenDirectory("scripts/", true);
 	if (dir)
 	{
-		PrintToServer("Found weapon scripts directory");
+		PrintToServer("[CG] Found weapon scripts directory");
 		char buffer[PLATFORM_MAX_PATH];
 		char filename[PLATFORM_MAX_PATH];
 		FileType type;
@@ -19,6 +19,7 @@ loadConfig()
 			{
 				if (StrContains(filename, "weapon_", false) == 0 && StrEqual(filename[strlen(filename) - 3], "txt", false))
 				{
+					PrintToServer("Found weapon script: %s", filename);
 					Format(buffer, sizeof(buffer), "scripts/%s", filename);
 					Handle kv = CreateKeyValues("customguns");
 					if (!FileToKeyValues(kv, buffer))
@@ -34,6 +35,7 @@ loadConfig()
 					{
 						if (KvJumpToKeyFix(kv, "CustomGunsPluginData"))
 						{
+							PrintToServer("%s IS CUSTOM", filename);
 							PushArrayString(gunAnimPrefix, animPrefix);
 							Format(filename, strlen(filename) - 3, filename);
 							PushArrayString(gunClassNames, filename);
@@ -171,6 +173,7 @@ loadConfig()
 
 bool KvJumpToKeyFix(Handle kv, const char[] key)
 {
+	//PrintToServer("[CG HELPERS] KvJumpToKeyFix"); called a lot at startup
 	char section[255];
 	do {
 		if (KvGetSectionName(kv, section, sizeof(section)))
@@ -184,6 +187,7 @@ bool KvJumpToKeyFix(Handle kv, const char[] key)
 
 void removeCustomWeapon(int client)
 {
+	PrintToServer("[CG HELPERS] removeCustomWeapon");
 	// Loop through all client weapons and remove ours
 	int offset = FindDataMapInfo(client, "m_hMyWeapons") - 4;
 	for (new i = 0; i < MAX_WEAPONS; i++)
@@ -205,12 +209,14 @@ void removeCustomWeapon(int client)
 
 void RemovePlayerAmmo(int client, int weapon, int ammo = 1)
 {
+	PrintToServer("[CG HELPERS] RemovePlayerAmmo");
 	SDKCall(CALL_RemoveAmmo, client, ammo, GetEntProp(weapon, Prop_Send, "m_iPrimaryAmmoType"));
 	updateWeaponInventoryAmmo(weapon, getIndexEnt(weapon), client);
 }
 
 bool hasCustomWeapon(int client)
 {
+	PrintToServer("[CG HELPERS] hasCustomWeapon");
 	int offset = FindDataMapInfo(client, "m_hMyWeapons") - 4;
 	for (new i = 0; i < MAX_WEAPONS; i++)
 	{
@@ -227,6 +233,7 @@ bool hasCustomWeapon(int client)
 
 void addSpawnWeapons(client)
 {
+	PrintToServer("[CG HELPERS] addSpawnWeapons");
 	int size = GetArraySize(gunClassNames);
 	for (int i = 0; i < size; i++)
 	{
@@ -241,11 +248,13 @@ void addSpawnWeapons(client)
 
 stock bool addToInventory(int client, const char[] weapon, bool refreshWheel = true, bool ignoreAdminLevel = false)
 {
+	PrintToServer("[CG HELPERS] addToInventory");
 	return addToInventoryIndex(client, getIndex(weapon), refreshWheel, ignoreAdminLevel);
 }
 
 stock bool addToInventoryIndex(int client, int weaponIndex, bool refreshWheel = true, bool ignoreAdminLevel = false)
 {
+	PrintToServer("[CG HELPERS] addToInventoryIndex");
 	if (weaponIndex != -1)
 	{
 		if (IsPlayerAlive(client) && canHaveGun(client, weaponIndex, ignoreAdminLevel))
@@ -309,6 +318,7 @@ stock bool addToInventoryIndex(int client, int weaponIndex, bool refreshWheel = 
 
 void clearInventory(int client, bool clearPersistent = false)
 {
+	PrintToServer("[CG HELPERS] clearInventory");
 	if (inventory[client])
 	{
 		for (int i = 0; i < GetArraySize(inventory[client]); i++)
@@ -334,6 +344,7 @@ void clearInventory(int client, bool clearPersistent = false)
 
 int selectBestIndex(int client)
 {
+	PrintToServer("[CG HELPERS] selectBestIndex");
 	if (preferedGunIndex[client] != -1 && canSelectInInventory(client, preferedGunIndex[client]))
 	{
 		return preferedGunIndex[client];
@@ -362,6 +373,7 @@ int selectBestIndex(int client)
 
 void updateWeaponInventoryAmmo(int weapon, int weaponIndex, int client)
 {
+	PrintToServer("[CG HELPERS] updateWeaponInventoryAmmo");
 	// save current ammo values in player's inventory
 	int saveAmmo = SDKCall(CALL_UsesClipsForAmmo1, weapon) ? GetEntProp(weapon, Prop_Data, "m_iClip1") : 0;
 	setInventoryAmmo(client, weaponIndex, saveAmmo, GetEntProp(weapon, Prop_Data, "m_iPrimaryAmmoType"));
@@ -369,6 +381,7 @@ void updateWeaponInventoryAmmo(int weapon, int weaponIndex, int client)
 
 void setInventoryAmmo(int client, int weaponIndex, int ammo, int ammoType)
 {
+	PrintToServer("[CG HELPERS] setInventoryAmmo");
 	int index = getInventoryIndex(client, weaponIndex);
 	if (index != -1)
 	{
@@ -379,6 +392,7 @@ void setInventoryAmmo(int client, int weaponIndex, int ammo, int ammoType)
 
 int getInventoryAmmo(int client, int weaponIndex)
 {
+	PrintToServer("[CG HELPERS] getInventoryAmmo");
 	int index = getInventoryIndex(client, weaponIndex);
 	if (index != -1)
 	{
@@ -389,6 +403,7 @@ int getInventoryAmmo(int client, int weaponIndex)
 
 bool pickAmmoFromWeapon(int client, int weapon)
 {
+	PrintToServer("[CG HELPERS] pickAmmoFromWeapon");
 	int gunIndex = getIndexEnt(weapon);
 	if (gunIndex != -1)
 	{
@@ -412,11 +427,13 @@ bool pickAmmoFromWeapon(int client, int weapon)
 
 bool hasInInventory(int client, int weaponIndex)
 {
+	PrintToServer("[CG HELPERS] hasInInventory");
 	return getInventoryIndex(client, weaponIndex) != -1;
 }
 
 bool canSelectInInventory(int client, int weaponIndex)
 {
+	PrintToServer("[CG HELPERS] canSelectInInventory");
 	int invIndex = getInventoryIndex(client, weaponIndex);
 	if (invIndex != -1 && canSelectItem(client, invIndex))
 		return true;
@@ -425,6 +442,7 @@ bool canSelectInInventory(int client, int weaponIndex)
 
 int getInventoryIndex(int client, int weaponIndex)
 {
+	PrintToServer("[CG HELPERS] getInventoryIndex");
 	if (inventory[client])
 	{
 		int size = GetArraySize(inventory[client]);
@@ -441,6 +459,7 @@ int getInventoryIndex(int client, int weaponIndex)
 
 bool canSelectItem(int client, int inventoryIndex)
 {
+	PrintToServer("[CG HELPERS] canSelectItem");
 	int invAmmo = GetArrayCell(inventoryAmmo[client], inventoryIndex);
 	int invAmmoType = GetArrayCell(inventoryAmmoType[client], inventoryIndex);
 	int gunIndex = GetArrayCell(inventory[client], inventoryIndex);
@@ -454,11 +473,13 @@ bool canSelectItem(int client, int inventoryIndex)
 
 bool isCustom(int weaponEnt)
 {
+	//PrintToServer("[CG HELPERS] isCustom"); runs frequently
 	return getIndexEnt(weaponEnt) != -1;
 }
 
 int getIndexEnt(int weaponEnt)
 {
+	//PrintToServer("[CG HELPERS] getIndexEnt"); runs frequently
 	if (weaponEnt == -1) return -1;
 	char sWeapon[32];
 	GetEdictClassname(weaponEnt, sWeapon, sizeof(sWeapon));
@@ -467,11 +488,14 @@ int getIndexEnt(int weaponEnt)
 
 int getIndex(const char[] weapon)
 {
+	// This runs all the time apparently
+	// PrintToServer("[CG HELPERS] getIndex");
 	return FindStringInArray(gunClassNames, weapon);
 }
 
 int getDefaultIndex()
 {
+	PrintToServer("[CG HELPERS] getDefaultIndex");
 	char gun[32];
 	GetConVarString(customguns_default, gun, sizeof(gun));
 	return getIndex(gun);
@@ -479,6 +503,7 @@ int getDefaultIndex()
 
 bool canHaveGun(int client, int gunIndex, bool ignoreAdminLevel)
 {
+	PrintToServer("[CG HELPERS] canHaveGun");
 	if (FindValueInArray(inventory[client], gunIndex) == -1)
 	{
 		int clientFlags = GetUserFlagBits(client);
@@ -493,16 +518,19 @@ bool canHaveGun(int client, int gunIndex, bool ignoreAdminLevel)
 
 GunType getType(int index)
 {
+	PrintToServer("[CG HELPERS] getType");
 	return GetArrayCell(gunType, index)
 }
 
 void getShootPosition(int client, float pos[3])
 {
+	PrintToServer("[CG HELPERS] getShootPosition");
 	SDKCall(CALL_ShootPosition, client, pos);
 }
 
 public Action stopSound(Handle timer, any data)
 {
+	PrintToServer("[CG HELPERS] stopSound")
 	if (IsValidEntity(data))
 	{
 		SDKCall(CALL_StopWeaponSound, data, SINGLE);
@@ -522,6 +550,7 @@ public Action deploySound(Handle timer, any data)
 
 public Action delayedKill(Handle timer, any ent)
 {
+	PrintToServer("[CG HELPERS] delayedKill")
 	if (IsValidEntity(ent))
 	{
 		AcceptEntityInput(ent, "kill");
@@ -589,6 +618,7 @@ void RadiusDamageHack(int inflictor, int attacker, float dmg, int dmgType, int w
 
 public MRESReturn RadiusDamage(Handle hParams)
 {
+	PrintToServer("[CG HELPERS] RadiusDamage");
 	DHookSetParamObjectPtrVar(hParams, 1, 36, ObjectValueType_Ehandle, RDH_INFLICTOR);
 	DHookSetParamObjectPtrVar(hParams, 1, 40, ObjectValueType_Ehandle, RDH_ATTACKER);
 	if (RDH_WEAPON != -1)
