@@ -244,7 +244,8 @@ public MRESReturn BumpWeapon(int client, Handle hReturn, Handle hParams)
 		// Can this be added to player's inventory?
 		if (addToInventoryIndex(client, gunIndex))
 		{
-			// Player put the gun in his inventory
+			// Gun has been put in player's inventory,
+			// Remove entity from world
 
 			SDKCall(CALL_CheckRespawn, gun);
 
@@ -252,6 +253,7 @@ public MRESReturn BumpWeapon(int client, Handle hReturn, Handle hParams)
 			DHookSetReturn(hReturn, 1);
 			return MRES_Supercede;
 		}
+		/* FOF doesn't really have 'ammo' like this
 		else if (pickAmmoFromWeapon(client, gun)) {
 			// Grabbed the ammo instead
 			// CHL2MP_Player behavior : If we have room for the ammo, then "take" the weapon too.
@@ -262,7 +264,7 @@ public MRESReturn BumpWeapon(int client, Handle hReturn, Handle hParams)
 			DHookSetReturn(hReturn, 1);
 			return MRES_Supercede;
 
-			/*
+			
 			// CBasePlayer behavior
 			// check for ammo left
 
@@ -277,9 +279,9 @@ public MRESReturn BumpWeapon(int client, Handle hReturn, Handle hParams)
 			DHookSetReturn(hReturn, 1);
 			return MRES_Supercede;
 
-			*/
+			
 		}
-
+		*/
 		DHookSetReturn(hReturn, 0);
 		return MRES_Supercede;
 	}
@@ -535,11 +537,18 @@ public MRESReturn SecondaryAttack(int weapon)
 // void CBaseCombatWeapon::Drop( const Vector &vecVelocity )
 public MRESReturn Drop(int weapon)
 {
-	PrintToServer("[CG HOOK] Drop");
 	int client = GetOwner(weapon);
-	if (IsPlayer(client))
+	if (IsPlayer(client) && isCustom(weapon))
 	{
-		clearInventory(client);
+		PrintToServer("[CG HOOK] Dropping custom weapon %d", client);
+		// Remove custom weapon from inventory
+		clearInventory(client, true);
+
+		// Remove entity from world
+		//AcceptEntityInput(weapon, "kill");
+		SDKHooks_DropWeapon(client, weapon);
+
+		return MRES_Supercede;
 	}
 	return MRES_Ignored;
 }

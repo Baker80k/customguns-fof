@@ -589,6 +589,7 @@ public OnClientCookiesCached(int client)
 
 public void OnSpawn(Handle event, const char[] name, bool dontBroadcast)
 {
+	// TODO: this is where the other goongame interaction should go
 	int client = GetClientOfUserId(GetEventInt(event, "userid"));
 	if (!IsFakeClient(client))
 	{
@@ -788,56 +789,56 @@ int spawnGun(int index, const float origin[3] = NULL_VECTOR)
 public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float angles[3], &weapon, &subtype, &cmdnum, &tickcount, &seed, mouse[2])
 {
 	//I don't want to deal with the selection wheel, so I'm going to disable it
-	if (!IsFakeClient(client))
-	{
-		char sWeapon[32];
-		GetClientWeapon(client, sWeapon, sizeof(sWeapon));
-		int gunIndex = getIndex(sWeapon);
+	// if (!IsFakeClient(client))
+	// {
+	// 	char sWeapon[32];
+	// 	GetClientWeapon(client, sWeapon, sizeof(sWeapon));
+	// 	int gunIndex = getIndex(sWeapon);
 
-		// handle opening/closing menu
-		//if (!open[client] && IsPlayerAlive(client) && !zooming(client) && inventory[client] && GetArraySize(inventory[client]) > 0 && GetEntProp(client, Prop_Send, "m_iTeamNum") != 1)
-		if (!open[client] && IsPlayerAlive(client) && inventory[client] && GetArraySize(inventory[client]) > 0 && GetEntProp(client, Prop_Send, "m_iTeamNum") != 1)
-		{
-			if (buttons & IN_ATTACK3)
-			{
-				onMenuOpening(client);
-				open[client] = true;
-			}
-			else if (buttons & IN_RELOAD) {
-				if (!(!GetConVarBool(customguns_global_switcher) && gunIndex == -1))
-				{
-					if (!(GetEntProp(client, Prop_Data, "m_nOldButtons") & IN_RELOAD))
-					{
-						firstOpen[client] = GetGameTime();
-					}
-					else if (GetGameTime() >= firstOpen[client] + 0.25) {
-						// if (!StrEqual(sWeapon, "weapon_physcannon")) {
-						onMenuOpening(client);
-						open[client] = true;
-						//}
-					}
-				}
-			}
-		}
-		// if not holding any button or dead -> close the menu
-		else if (open[client] && (!(buttons & IN_ATTACK3) && !(buttons & IN_RELOAD)) || !IsPlayerAlive(client)) {
-			if (IsClientInGame(client) && IsPlayerAlive(client))
-			{
-				PrintToServer("Closing menu for %N", client);
-				onMenuClosing(client);
-				PrintToServer("Closed menu for %N", client);
-			}
-			open[client] = false;
-		}
+	// 	// handle opening/closing menu
+	// 	//if (!open[client] && IsPlayerAlive(client) && !zooming(client) && inventory[client] && GetArraySize(inventory[client]) > 0 && GetEntProp(client, Prop_Send, "m_iTeamNum") != 1)
+	// 	if (!open[client] && IsPlayerAlive(client) && inventory[client] && GetArraySize(inventory[client]) > 0 && GetEntProp(client, Prop_Send, "m_iTeamNum") != 1)
+	// 	{
+	// 		if (buttons & IN_ATTACK3)
+	// 		{
+	// 			onMenuOpening(client);
+	// 			open[client] = true;
+	// 		}
+	// 		else if (buttons & IN_RELOAD) {
+	// 			if (!(!GetConVarBool(customguns_global_switcher) && gunIndex == -1))
+	// 			{
+	// 				if (!(GetEntProp(client, Prop_Data, "m_nOldButtons") & IN_RELOAD))
+	// 				{
+	// 					firstOpen[client] = GetGameTime();
+	// 				}
+	// 				else if (GetGameTime() >= firstOpen[client] + 0.25) {
+	// 					// if (!StrEqual(sWeapon, "weapon_physcannon")) {
+	// 					onMenuOpening(client);
+	// 					open[client] = true;
+	// 					//}
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+	// 	// if not holding any button or dead -> close the menu
+	// 	else if (open[client] && (!(buttons & IN_ATTACK3) && !(buttons & IN_RELOAD)) || !IsPlayerAlive(client)) {
+	// 		if (IsClientInGame(client) && IsPlayerAlive(client))
+	// 		{
+	// 			PrintToServer("Closing menu for %N", client);
+	// 			onMenuClosing(client);
+	// 			PrintToServer("Closed menu for %N", client);
+	// 		}
+	// 		open[client] = false;
+	// 	}
 
-		if (open[client])
-		{
-			drawMenu(client);
-		}
+	// 	if (open[client])
+	// 	{
+	// 		drawMenu(client);
+	// 	}
 
-		// check scope
-		// Ignoring scope for now - BKR
-		//ScopeThink(client, buttons, gunIndex, open[client]);
-	}
+	// 	// check scope
+	// 	// Ignoring scope for now - BKR
+	// 	//ScopeThink(client, buttons, gunIndex, open[client]);
+	// }
 	return Plugin_Continue;
 }

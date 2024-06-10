@@ -111,7 +111,7 @@ public void CG_ItemPostFrame(int client, int weapon){
 	GetEntityClassname(weapon, sWeapon, sizeof(sWeapon));
 	
 	if(StrEqual(sWeapon, WEAPON)){
-		PrintToServer("[CG SHOVEL] CG_ItemPostFrame");
+		//PrintToServer("[CG SHOVEL] CG_ItemPostFrame"); // Spams console
 		if(!(GetClientButtons(client) & IN_ATTACK) && GetGameTime() >= nextEnergy[client])
 		{
 			additionalTime[client] *= 0.5;

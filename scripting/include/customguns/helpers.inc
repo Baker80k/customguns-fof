@@ -401,6 +401,7 @@ int getInventoryAmmo(int client, int weaponIndex)
 	return -1;
 }
 
+/* Not used in FoF
 bool pickAmmoFromWeapon(int client, int weapon)
 {
 	PrintToServer("[CG HELPERS] pickAmmoFromWeapon");
@@ -423,7 +424,8 @@ bool pickAmmoFromWeapon(int client, int weapon)
 		}
 	}
 	return false;
-}
+}*/
+
 
 bool hasInInventory(int client, int weaponIndex)
 {
@@ -503,22 +505,32 @@ int getDefaultIndex()
 
 bool canHaveGun(int client, int gunIndex, bool ignoreAdminLevel)
 {
+	//TODO: this might be logic we come back to for goongame, 
+	// where we don't let players pick up guns they shouldn't have
 	PrintToServer("[CG HELPERS] canHaveGun");
+	// if (FindValueInArray(inventory[client], gunIndex) == -1)
+	// {
+	// 	int clientFlags = GetUserFlagBits(client);
+	// 	int gunFlags = GetArrayCell(gunAdminLevel, gunIndex);
+	// 	if (ignoreAdminLevel || gunFlags == -1 || clientFlags & ADMFLAG_ROOT || clientFlags & gunFlags)
+	// 	{
+	// 		return true;
+	// 	}
+	// }
+	// return false;
+	
+	// The way we're doing it now, player can 'have gun'
+	// only if it is not in inventory already
 	if (FindValueInArray(inventory[client], gunIndex) == -1)
 	{
-		int clientFlags = GetUserFlagBits(client);
-		int gunFlags = GetArrayCell(gunAdminLevel, gunIndex);
-		if (ignoreAdminLevel || gunFlags == -1 || clientFlags & ADMFLAG_ROOT || clientFlags & gunFlags)
-		{
-			return true;
-		}
+		return true;
 	}
 	return false;
 }
 
 GunType getType(int index)
 {
-	PrintToServer("[CG HELPERS] getType");
+	//PrintToServer("[CG HELPERS] getType");
 	return GetArrayCell(gunType, index)
 }
 
