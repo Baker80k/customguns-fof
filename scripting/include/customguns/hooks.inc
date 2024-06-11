@@ -34,19 +34,19 @@ public OnWeaponSwitchPost(client, weapon)
 	char sWeapon[32];
 	GetEdictClassname(weapon, sWeapon, sizeof(sWeapon));
 	int size = GetArraySize(gunClassNames);
-	if (GetConVarBool(customguns_autogive))
-	{
-		for (int i = 0; i < size; i++)
-		{
-			char masterWeapon[32];
-			GetArrayString(gunGiveMasterWeapon, i, masterWeapon, sizeof(masterWeapon));
+	// if (GetConVarBool(customguns_autogive))
+	// {
+	// 	for (int i = 0; i < size; i++)
+	// 	{
+	// 		char masterWeapon[32];
+	// 		GetArrayString(gunGiveMasterWeapon, i, masterWeapon, sizeof(masterWeapon));
 
-			if (StrEqual(masterWeapon, sWeapon))
-			{
-				addToInventoryIndex(client, i);
-			}
-		}
-	}
+	// 		if (StrEqual(masterWeapon, sWeapon))
+	// 		{
+	// 			addToInventoryIndex(client, i);
+	// 		}
+	// 	}
+	// }
 
 	// equip binded weapon
 	for (int i = 0; i < size; i++)
@@ -72,22 +72,22 @@ public OnWeaponSwitchPost(client, weapon)
 public OnWeaponEquipPost(client, weapon)
 {
 	PrintToServer("[CG HOOK] OnWeaponEquipPost %d %d", client, weapon);
-	if (GetConVarBool(customguns_autogive))
-	{
-		char sWeapon[32];
-		GetEdictClassname(weapon, sWeapon, sizeof(sWeapon));
-		int size = GetArraySize(gunClassNames);
-		for (int i = 0; i < size; i++)
-		{
-			char masterWeapon[32];
-			GetArrayString(gunGiveMasterWeapon, i, masterWeapon, sizeof(masterWeapon));
+	// if (GetConVarBool(customguns_autogive))
+	// {
+	// 	char sWeapon[32];
+	// 	GetEdictClassname(weapon, sWeapon, sizeof(sWeapon));
+	// 	int size = GetArraySize(gunClassNames);
+	// 	for (int i = 0; i < size; i++)
+	// 	{
+	// 		char masterWeapon[32];
+	// 		GetArrayString(gunGiveMasterWeapon, i, masterWeapon, sizeof(masterWeapon));
 
-			if (StrEqual(masterWeapon, sWeapon))
-			{
-				addToInventoryIndex(client, i);
-			}
-		}
-	}
+	// 		if (StrEqual(masterWeapon, sWeapon))
+	// 		{
+	// 			addToInventoryIndex(client, i);
+	// 		}
+	// 	}
+	// }
 }
 
 public Action vmSwapDelay(Handle timer, any data)

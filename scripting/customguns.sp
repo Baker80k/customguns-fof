@@ -5,17 +5,15 @@
 #include <dhooks>
 
 #include <customguns/activity_list>
-#include <customguns/drawingtools>
+//#include <customguns/drawingtools>
 #include <customguns/const>
 #include <customguns/stocks>
 #include <customguns/globals>
 
-#include <customguns/styles>
+//#include <customguns/styles>
 #include <customguns/hooks>
 #include <customguns/throwable>
 #include <customguns/helpers>
-#include <customguns/menu>
-#include <customguns/addons_scope>
 
 #define PLUGIN_VERSION "1.7"
 
@@ -323,13 +321,13 @@ public OnPluginStart()
 		CALL_Weapon_Switch = EndPrepSDKCall();
 
 		// int CHL2_Player::GiveAmmo( int nCount, int nAmmoIndex, bool bSuppressSound)
-		StartPrepSDKCall(SDKCall_Player);
-		PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "GiveAmmo");
-		PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
-		PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
-		PrepSDKCall_AddParameter(SDKType_Bool, SDKPass_Plain);
-		PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
-		CALL_GiveAmmo = EndPrepSDKCall();
+		// StartPrepSDKCall(SDKCall_Player);
+		// PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "GiveAmmo");
+		// PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
+		// PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
+		// PrepSDKCall_AddParameter(SDKType_Bool, SDKPass_Plain);
+		// PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
+		// CALL_GiveAmmo = EndPrepSDKCall();
 
 		// int CBaseCombatCharacter::GetAmmoCount( int iAmmoIndex )
 		StartPrepSDKCall(SDKCall_Player);
@@ -402,7 +400,7 @@ public OnPluginStart()
 
 	Throwable_OnPluginStart();
 	loadConfig();
-	loadStyles();
+	//loadStyles();
 
 	LoadTranslations("common.phrases");
 	HookEvent("player_spawn", OnSpawn);
@@ -410,22 +408,15 @@ public OnPluginStart()
 
 	CreateConVar("hl2dm_customguns_version", PLUGIN_VERSION, "Customguns version", FCVAR_SPONLY | FCVAR_REPLICATED | FCVAR_NOTIFY);
 	customguns_default = CreateConVar("customguns_default", "weapon_hands", "The preferred custom weapon that players should spawn with");
-	customguns_global_switcher = CreateConVar("customguns_global_switcher", "1", "Enables fast switching from any weapon by holding reload button. If 0, players can switch only when holding a custom weapon.", _, true, 0.0, true, 1.0);
-	customguns_order_alphabetically = CreateConVar("customguns_order_alphabetically", "1", "If enabled, orders weapons by name in the menu, rather than the order they were picked up. Only applies to dynamic wheel mode", _, true, 0.0, true, 1.0);
-	customguns_autogive = CreateConVar("customguns_autogive", "0", "Globally enables/disables auto-giving of all custom weapons", _, true, 0.0, true, 1.0);
-	customguns_static_wheel = CreateConVar("customguns_static_wheel", "0", "Enables stationary item placement in the radial menu (1) versus dynamic placement and resizing (0)", _, true, 0.0, true, 1.0);
-	HookConVarChange(customguns_static_wheel, WheelModeChanged);
 
 	PrimaryAttackForward = CreateGlobalForward("CG_OnPrimaryAttack", ET_Ignore, Param_Cell, Param_Cell);
 	SecondaryAttackForward = CreateGlobalForward("CG_OnSecondaryAttack", ET_Ignore, Param_Cell, Param_Cell);
 	ItemPostFrameForward = CreateGlobalForward("CG_ItemPostFrame", ET_Ignore, Param_Cell, Param_Cell);
 	HolsterForward = CreateGlobalForward("CG_OnHolster", ET_Ignore, Param_Cell, Param_Cell, Param_Cell);
 
-	cookie_menu_style = RegClientCookie("customguns_style", "CustomGuns menu style cookie", CookieAccess_Public);
-
+	RegAdminCmd("sm_cg", CustomGun, ADMFLAG_ROOT, "Spawns a custom gun by classname");
 	RegAdminCmd("sm_customgun", CustomGun, ADMFLAG_ROOT, "Spawns a custom gun by classname");
 	RegAdminCmd("sm_customguns", CustomGun, ADMFLAG_ROOT, "Spawns a custom gun by classname");
-	RegConsoleCmd("sm_gunmenu", ShowStyleMenu, "Opens customguns wheel style selector");
 	RegAdminCmd("sm_seqtest", SeqTest, ADMFLAG_ROOT, "Viewmodel sequence test");
 
 	for (int i = 1; i <= MaxClients; i++)
@@ -519,12 +510,11 @@ public Action CustomGun(int client, int args)
 public OnConfigsExecuted()
 {
 	PrintToServer("[CG] OnConfigsExecuted");
-	precacheStyles();
 
-	PrecacheSound(SND_OPEN, true);
-	PrecacheSound(SND_CLOSE_OK, true);
-	PrecacheScriptSound(SND_CLOSE_CANC);
-	PrecacheScriptSound(SND_SELECT);
+	// PrecacheSound(SND_OPEN, true);
+	// PrecacheSound(SND_CLOSE_OK, true);
+	// PrecacheScriptSound(SND_CLOSE_CANC);
+	// PrecacheScriptSound(SND_SELECT);
 	Throwable_OnMapStart();
 
 	ClearArray(gunModelIndexes);
@@ -558,8 +548,6 @@ public OnClientPutInServer(int client)
 		DHookEntity(DHOOK_FireBullets, false, client);
 		DHookEntity(DHOOK_TranslateActivity, false, client);
 		DHookEntity(DHOOK_BumpWeapon, false, client);
-
-		ScopeInit(client);
 	}
 }
 
@@ -571,7 +559,7 @@ public OnClientDisconnect(int client)
 		open[client] = false;
 		preferedGunIndex[client] = -1;
 		nextFireSound[client] = 0.0;
-		nextDrawText[client] = 0.0;
+		//nextDrawText[client] = 0.0;
 		firstOpen[client] = 0.0;
 		menuStyle[client] = 0;
 		delete inventory[client];
@@ -580,11 +568,6 @@ public OnClientDisconnect(int client)
 		delete inventoryAmmo[client];
 		delete inventoryAmmoType[client];
 	}
-}
-
-public OnClientCookiesCached(int client)
-{
-	ReloadStyle(client);
 }
 
 public void OnSpawn(Handle event, const char[] name, bool dontBroadcast)
@@ -789,57 +772,5 @@ int spawnGun(int index, const float origin[3] = NULL_VECTOR)
 
 public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float angles[3], &weapon, &subtype, &cmdnum, &tickcount, &seed, mouse[2])
 {
-	//I don't want to deal with the selection wheel, so I'm going to disable it
-	// if (!IsFakeClient(client))
-	// {
-	// 	char sWeapon[32];
-	// 	GetClientWeapon(client, sWeapon, sizeof(sWeapon));
-	// 	int gunIndex = getIndex(sWeapon);
-
-	// 	// handle opening/closing menu
-	// 	//if (!open[client] && IsPlayerAlive(client) && !zooming(client) && inventory[client] && GetArraySize(inventory[client]) > 0 && GetEntProp(client, Prop_Send, "m_iTeamNum") != 1)
-	// 	if (!open[client] && IsPlayerAlive(client) && inventory[client] && GetArraySize(inventory[client]) > 0 && GetEntProp(client, Prop_Send, "m_iTeamNum") != 1)
-	// 	{
-	// 		if (buttons & IN_ATTACK3)
-	// 		{
-	// 			onMenuOpening(client);
-	// 			open[client] = true;
-	// 		}
-	// 		else if (buttons & IN_RELOAD) {
-	// 			if (!(!GetConVarBool(customguns_global_switcher) && gunIndex == -1))
-	// 			{
-	// 				if (!(GetEntProp(client, Prop_Data, "m_nOldButtons") & IN_RELOAD))
-	// 				{
-	// 					firstOpen[client] = GetGameTime();
-	// 				}
-	// 				else if (GetGameTime() >= firstOpen[client] + 0.25) {
-	// 					// if (!StrEqual(sWeapon, "weapon_physcannon")) {
-	// 					onMenuOpening(client);
-	// 					open[client] = true;
-	// 					//}
-	// 				}
-	// 			}
-	// 		}
-	// 	}
-	// 	// if not holding any button or dead -> close the menu
-	// 	else if (open[client] && (!(buttons & IN_ATTACK3) && !(buttons & IN_RELOAD)) || !IsPlayerAlive(client)) {
-	// 		if (IsClientInGame(client) && IsPlayerAlive(client))
-	// 		{
-	// 			PrintToServer("Closing menu for %N", client);
-	// 			onMenuClosing(client);
-	// 			PrintToServer("Closed menu for %N", client);
-	// 		}
-	// 		open[client] = false;
-	// 	}
-
-	// 	if (open[client])
-	// 	{
-	// 		drawMenu(client);
-	// 	}
-
-	// 	// check scope
-	// 	// Ignoring scope for now - BKR
-	// 	//ScopeThink(client, buttons, gunIndex, open[client]);
-	// }
 	return Plugin_Continue;
 }

@@ -5,13 +5,7 @@
 
 // CVARS
 Handle customguns_default;
-Handle customguns_global_switcher;
 Handle customguns_autogive;
-Handle customguns_order_alphabetically;
-Handle customguns_static_wheel;
-
-// COOKIES
-Handle cookie_menu_style;
 
 // Config
 // All
@@ -58,8 +52,8 @@ int CLIENT_BEING_EQUIPPED = -1;
 
 bool open[MAXPLAYERS + 1];
 float firstOpen[MAXPLAYERS + 1];
-float nextDrawText[MAXPLAYERS + 1];
-float startEyeAngles[MAXPLAYERS + 1][3];
+//float nextDrawText[MAXPLAYERS + 1];
+//float startEyeAngles[MAXPLAYERS + 1][3];
 
 int gunEnt[MAXPLAYERS + 1] = { -1, ... };
 int selectedGunIndex[MAXPLAYERS + 1] = { -1, ... };
@@ -105,7 +99,7 @@ Handle CALL_SendWeaponAnim;
 Handle CALL_SendViewModelAnim;
 Handle CALL_CheckRespawn;
 Handle CALL_UsesClipsForAmmo1;
-Handle CALL_GiveAmmo;
+//Handle CALL_GiveAmmo;
 Handle CALL_GetAmmoCount;
 Handle CALL_RemoveAmmo;
 Handle CALL_SetAnimation;
