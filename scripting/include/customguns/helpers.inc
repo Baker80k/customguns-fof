@@ -338,7 +338,7 @@ void clearInventory(int client, bool clearPersistent = false)
 			RemoveFromArray(inventoryAmmoType[client], i);
 			i--;
 		}
-		generateWheel(client);
+		//generateWheel(client);
 	}
 }
 

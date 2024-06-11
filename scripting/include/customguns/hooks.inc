@@ -540,15 +540,16 @@ public MRESReturn Drop(int weapon)
 	int client = GetOwner(weapon);
 	if (IsPlayer(client) && isCustom(weapon))
 	{
-		PrintToServer("[CG HOOK] Dropping custom weapon %d", client);
+		// Check if the player's inventory is already clear
+		if (selectedGunIndex[client] == -1) {
+			PrintToServer("[CG Hook] Preventing infinite recursion in Drop");
+			return MRES_Ignored;
+		}
+		
 		// Remove custom weapon from inventory
 		clearInventory(client, true);
-
-		// Remove entity from world
-		//AcceptEntityInput(weapon, "kill");
 		SDKHooks_DropWeapon(client, weapon);
-
-		return MRES_Supercede;
+		return MRES_Supercede
 	}
 	return MRES_Ignored;
 }
