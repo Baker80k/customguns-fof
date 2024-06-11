@@ -15,6 +15,7 @@ cp ~/proj/sourcemod/customguns-fof/custom/Custom_Weapons.vpk "/mnt/f/SteamLibrar
 # Compile the plugin to server directory
 /home/baker/proj/sourcemod/servers/fof_server_wsl/fof/addons/sourcemod/scripting/spcomp ~/proj/sourcemod/customguns-fof/scripting/customguns.sp -o ~/proj/sourcemod/servers/fof_server_wsl/fof/addons/sourcemod/plugins/customguns.smx -i ~/proj/sourcemod/customguns-fof/scripting/include -i ~/proj/sourcemod/customguns-fof/scripting -i ~/proj/sourcemod/servers/fof_server_wsl/fof/addons/sourcemod/scripting/include -O2 -v2
 /home/baker/proj/sourcemod/servers/fof_server_wsl/fof/addons/sourcemod/scripting/spcomp ~/proj/sourcemod/customguns-fof/scripting/weapon_shovel.sp -o ~/proj/sourcemod/servers/fof_server_wsl/fof/addons/sourcemod/plugins/weapon_shovel.smx -i ~/proj/sourcemod/customguns-fof/scripting/include -i ~/proj/sourcemod/customguns-fof/scripting -i ~/proj/sourcemod/servers/fof_server_wsl/fof/addons/sourcemod/scripting/include -O2 -v2
+/home/baker/proj/sourcemod/servers/fof_server_wsl/fof/addons/sourcemod/scripting/spcomp ~/proj/sourcemod/customguns-fof/scripting/weapon_gauss.sp -o ~/proj/sourcemod/servers/fof_server_wsl/fof/addons/sourcemod/plugins/weapon_gauss.smx -i ~/proj/sourcemod/customguns-fof/scripting/include -i ~/proj/sourcemod/customguns-fof/scripting -i ~/proj/sourcemod/servers/fof_server_wsl/fof/addons/sourcemod/scripting/include -O2 -v2
 
 # Copy other files to server directory
 cp ~/proj/sourcemod/customguns-fof/gamedata/customguns.txt ~/proj/sourcemod/servers/fof_server_wsl/fof/addons/sourcemod/gamedata/

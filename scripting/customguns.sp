@@ -593,6 +593,7 @@ public void OnSpawn(Handle event, const char[] name, bool dontBroadcast)
 	int client = GetClientOfUserId(GetEventInt(event, "userid"));
 	if (!IsFakeClient(client))
 	{
+		SetEntProp(client, Prop_Data, "m_bPredictWeapons", true);
 		selectedGunIndex[client] = -1;
 		if (GetConVarBool(customguns_autogive))
 		{
