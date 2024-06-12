@@ -112,6 +112,7 @@ public void CG_ItemPostFrame(int client, int weapon){
 	
 	if(StrEqual(sWeapon, WEAPON)){
 		//PrintToServer("[CG SHOVEL] CG_ItemPostFrame"); // Spams console
+		// This is needed to actually play the attack animation
 		if(!(GetClientButtons(client) & IN_ATTACK) && GetGameTime() >= nextEnergy[client])
 		{
 			additionalTime[client] *= 0.5;

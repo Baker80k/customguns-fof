@@ -567,6 +567,7 @@ public MRESReturn Holster(int weapon, Handle hReturn, Handle hParams)
 		int index = getIndexEnt(weapon);
 		GunType type = getType(index);
 
+		SetEntProp(client, Prop_Data, "m_bPredictWeapons", true); // added this - BKR
 		updateWeaponInventoryAmmo(weapon, index, client);
 
 		if (type == GunType_Throwable)

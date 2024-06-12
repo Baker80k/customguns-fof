@@ -414,7 +414,7 @@ public OnPluginStart()
 	ItemPostFrameForward = CreateGlobalForward("CG_ItemPostFrame", ET_Ignore, Param_Cell, Param_Cell);
 	HolsterForward = CreateGlobalForward("CG_OnHolster", ET_Ignore, Param_Cell, Param_Cell, Param_Cell);
 
-	RegAdminCmd("sm_cg", CustomGun, ADMFLAG_ROOT, "Spawns a custom gun by classname");
+	RegAdminCmd("cg", CustomGun, ADMFLAG_ROOT, "Spawns a custom gun by classname");
 	RegAdminCmd("sm_customgun", CustomGun, ADMFLAG_ROOT, "Spawns a custom gun by classname");
 	RegAdminCmd("sm_customguns", CustomGun, ADMFLAG_ROOT, "Spawns a custom gun by classname");
 	RegAdminCmd("sm_seqtest", SeqTest, ADMFLAG_ROOT, "Viewmodel sequence test");
@@ -576,7 +576,7 @@ public void OnSpawn(Handle event, const char[] name, bool dontBroadcast)
 	int client = GetClientOfUserId(GetEventInt(event, "userid"));
 	if (!IsFakeClient(client))
 	{
-		SetEntProp(client, Prop_Data, "m_bPredictWeapons", true);
+		SetEntProp(client, Prop_Data, "m_bPredictWeapons", true); // this didn't fix it
 		selectedGunIndex[client] = -1;
 		if (GetConVarBool(customguns_autogive))
 		{
@@ -686,8 +686,9 @@ int spawnGun(int index, const float origin[3] = NULL_VECTOR)
 	// weapon_cubemap : also good, but does not show stock ammo of player (pesky cubemap has -1 clips and no ammotype on client by default)
 	// weapon_ifm_base : The one used for the tf2 fork, doesn't work here
 	//int ent = CreateEntityByName("weapon_cubemap"); // crashes
-	//int ent = CreateEntityByName("weapon_machete"); // this works but the animations get funky
+	//int ent = CreateEntityByName("weapon_machete"); // this works but super breaks custom guns
 	//int ent = CreateEntityByName("weapon_annabelle"); // wanted to use this, crashes
+	//int ent = CreateEntityByName("weapon_crowbar"); // what happens if we match the 'animation type'? nothing. breaks it even more
 	int ent = CreateEntityByName("weapon_357");
 	PrintToServer("[CG] Entity index: %d", ent);
 	if (ent != -1)
