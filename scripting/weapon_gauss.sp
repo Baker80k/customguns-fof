@@ -73,7 +73,7 @@ public void CG_OnPrimaryAttack(int client, int weapon){
 		if(m_bCharging[client]){
 			return;
 		}
-		SetEntProp(client, Prop_Data, "m_bPredictWeapons", true);
+		//SetEntProp(client, Prop_Data, "m_bPredictWeapons", true);
 		//CG_SetPlayerAnimation(client, PLAYER_ATTACK1);
 		CG_PlayPrimaryAttack(weapon);
 		CG_SetNextPrimaryAttack(weapon, GetGameTime() + COOLDOWN_PRIMARY);
@@ -91,7 +91,7 @@ public void CG_OnSecondaryAttack(int client, int weapon){
 	
 	if(StrEqual(sWeapon, CLASSNAME)){
 		
-		SetEntProp(client, Prop_Data, "m_bPredictWeapons", true); 
+		//SetEntProp(client, Prop_Data, "m_bPredictWeapons", true); 
 		// if(getClientPrimaryAmmoForWeapon(client, weapon) <= 0){
 		// 	return;
 		// }

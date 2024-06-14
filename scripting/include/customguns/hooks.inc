@@ -67,6 +67,8 @@ public OnWeaponSwitchPost(client, weapon)
 			}
 		}
 	}
+	// Force client netprop to be visible
+	SetEntProp(client, Prop_Data, "m_bDrawViewmodel", 1);
 }
 
 public OnWeaponEquipPost(client, weapon)
@@ -191,18 +193,19 @@ public MRESReturn FireBullets(int client, Handle hParams)
 // This is a fix to allow player model animations/poses for unknown guns
 public MRESReturn TranslateActivity(int client, Handle hReturn, Handle hParams)
 {
-	// if (gunEnt[client] != -1 && selectedGunIndex[client] != -1)
-	// {
-	// 	PrintToServer("[CG HOOK] TranslateActivity, %d, %d", client, selectedGunIndex[client]);
-	// 	char animPrefix[32];
-	// 	GetArrayString(gunAnimPrefix, selectedGunIndex[client], animPrefix, sizeof(animPrefix));
-	// 	Activity resolved = resolveAnimFor(animPrefix, DHookGetParam(hParams, 1));
-	// 	if (resolved != ACT_INVALID)
-	// 	{
-	// 		DHookSetReturn(hReturn, resolved);
-	// 		return MRES_Supercede;
-	// 	}
-	// }
+	PrintToServer("Translate Activity Check: %d, %d", gunEnt[client], selectedGunIndex[client])
+	if (gunEnt[client] != -1 && selectedGunIndex[client] != -1)
+	{
+		PrintToServer("[CG HOOK] TranslateActivity, %d, %d", client, selectedGunIndex[client]);
+		char animPrefix[32];
+		GetArrayString(gunAnimPrefix, selectedGunIndex[client], animPrefix, sizeof(animPrefix));
+		Activity resolved = resolveAnimFor(animPrefix, DHookGetParam(hParams, 1));
+		if (resolved != ACT_INVALID)
+		{
+			DHookSetReturn(hReturn, resolved);
+			return MRES_Supercede;
+		}
+	}
 	return MRES_Ignored;
 }
 
@@ -567,7 +570,8 @@ public MRESReturn Holster(int weapon, Handle hReturn, Handle hParams)
 		int index = getIndexEnt(weapon);
 		GunType type = getType(index);
 
-		SetEntProp(client, Prop_Data, "m_bPredictWeapons", true); // added this - BKR
+		//SetEntProp(client, Prop_Data, "m_bPredictWeapons", true); // this might be breaking it - BKR
+		SetEntProp(client, Prop_Data, "m_bPredictWeapons", false); 
 		updateWeaponInventoryAmmo(weapon, index, client);
 
 		if (type == GunType_Throwable)

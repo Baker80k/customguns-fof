@@ -576,7 +576,7 @@ public void OnSpawn(Handle event, const char[] name, bool dontBroadcast)
 	int client = GetClientOfUserId(GetEventInt(event, "userid"));
 	if (!IsFakeClient(client))
 	{
-		SetEntProp(client, Prop_Data, "m_bPredictWeapons", true); // this didn't fix it
+		//SetEntProp(client, Prop_Data, "m_bPredictWeapons", true); // this might be breaking it
 		selectedGunIndex[client] = -1;
 		if (GetConVarBool(customguns_autogive))
 		{
@@ -685,11 +685,13 @@ int spawnGun(int index, const float origin[3] = NULL_VECTOR)
 	// basehlcombatweapon : pretty good, but overshadowing with other weapons at slot 0,0
 	// weapon_cubemap : also good, but does not show stock ammo of player (pesky cubemap has -1 clips and no ammotype on client by default)
 	// weapon_ifm_base : The one used for the tf2 fork, doesn't work here
-	//int ent = CreateEntityByName("weapon_cubemap"); // crashes
+	//int ent = CreateEntityByName("weapon_cubemap"); // exists, but crashes on weapon switch
 	//int ent = CreateEntityByName("weapon_machete"); // this works but super breaks custom guns
-	//int ent = CreateEntityByName("weapon_annabelle"); // wanted to use this, crashes
+	//int ent = CreateEntityByName("weapon_annabelle"); // this doesn't crash
 	//int ent = CreateEntityByName("weapon_crowbar"); // what happens if we match the 'animation type'? nothing. breaks it even more
-	int ent = CreateEntityByName("weapon_357");
+	//int ent = CreateEntityByName("weapon_coltnavy"); // I don't want to take over a fof-type gun if I can avoid it
+	//int ent = CreateEntityByName("weapon_pistol"); // even more broken.
+	int ent = CreateEntityByName("weapon_357"); // I think this works best because the fof guy used its 'revolver'-ness a bunch
 	PrintToServer("[CG] Entity index: %d", ent);
 	if (ent != -1)
 	{
@@ -767,7 +769,7 @@ int spawnGun(int index, const float origin[3] = NULL_VECTOR)
 
 		TeleportEntity(ent, origin, NULL_VECTOR, NULL_VECTOR);
 	}
-	PrintToServer("[CG] Spawned gun index: %d", ent);
+
 	return ent;
 }
 

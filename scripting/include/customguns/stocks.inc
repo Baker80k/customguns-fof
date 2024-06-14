@@ -513,10 +513,10 @@ stock void MarkSurrBoundsDirty(int entity)
 
 stock void swapVM(int client, bool predicted)
 {
-	PrintToServer("[CG Stocks] swapVM");
 	int oldVM = GetEntPropEnt(client, Prop_Send, "m_hViewModel");
 	char newClassname[32];
 	newClassname = predicted ? "predicted_viewmodel" : "viewmodel";
+	PrintToServer("[CG Stocks] swapVM, %s", newClassname);
 
 	if (oldVM != -1)
 	{
@@ -541,7 +541,9 @@ stock void swapVM(int client, bool predicted)
 
 	SetEntPropEnt(client, Prop_Send, "m_hViewModel", vm);
 	// ChangeEdictState(client, FindSendPropInfo("CHL2MP_Player", "m_hViewModel"));
-	PrintToServer("[CG Stocks] swapVM done");
+	char spawnedClassName[32];
+	GetEntityClassname(vm, spawnedClassName, 32);
+	PrintToServer("[CG Stocks] swapVM done, %s", spawnedClassName);
 }
 
 stock void VectorMin(const float vec1[3], const float vec2[3], float out[3])
