@@ -193,7 +193,7 @@ public MRESReturn FireBullets(int client, Handle hParams)
 // This is a fix to allow player model animations/poses for unknown guns
 public MRESReturn TranslateActivity(int client, Handle hReturn, Handle hParams)
 {
-	PrintToServer("Translate Activity Check: %d, %d", gunEnt[client], selectedGunIndex[client])
+	PrintToServer("Translate Activity Check: %d, %d", gunEnt[client], selectedGunIndex[client]);
 	if (gunEnt[client] != -1 && selectedGunIndex[client] != -1)
 	{
 		PrintToServer("[CG HOOK] TranslateActivity, %d, %d", client, selectedGunIndex[client]);

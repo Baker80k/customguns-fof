@@ -320,15 +320,6 @@ public OnPluginStart()
 		PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
 		CALL_Weapon_Switch = EndPrepSDKCall();
 
-		// int CHL2_Player::GiveAmmo( int nCount, int nAmmoIndex, bool bSuppressSound)
-		// StartPrepSDKCall(SDKCall_Player);
-		// PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "GiveAmmo");
-		// PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
-		// PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
-		// PrepSDKCall_AddParameter(SDKType_Bool, SDKPass_Plain);
-		// PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
-		// CALL_GiveAmmo = EndPrepSDKCall();
-
 		// int CBaseCombatCharacter::GetAmmoCount( int iAmmoIndex )
 		StartPrepSDKCall(SDKCall_Player);
 		PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "GetAmmoCount");
@@ -775,5 +766,6 @@ int spawnGun(int index, const float origin[3] = NULL_VECTOR)
 
 public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float angles[3], &weapon, &subtype, &cmdnum, &tickcount, &seed, mouse[2])
 {
+	setViewmodelVisible(client, true);
 	return Plugin_Continue;
 }
