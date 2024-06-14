@@ -5,7 +5,6 @@
 
 public Action OnWeaponSwitch(client, weapon)
 {
-	PrintToServer("[CG HOOK] WeaponSwitch %d %d", client, weapon);
 	if (isCustom(weapon))
 	{
 		swapVM(client, false);
@@ -20,7 +19,6 @@ public Action OnWeaponSwitch(client, weapon)
 
 public OnWeaponSwitchPost(client, weapon)
 {
-	PrintToServer("[CG HOOK] OnWeaponSwitchPost %d %d", client, weapon);
 	if (isCustom(weapon))
 	{
 		throwableReset(client);
@@ -34,19 +32,19 @@ public OnWeaponSwitchPost(client, weapon)
 	char sWeapon[32];
 	GetEdictClassname(weapon, sWeapon, sizeof(sWeapon));
 	int size = GetArraySize(gunClassNames);
-	// if (GetConVarBool(customguns_autogive))
-	// {
-	// 	for (int i = 0; i < size; i++)
-	// 	{
-	// 		char masterWeapon[32];
-	// 		GetArrayString(gunGiveMasterWeapon, i, masterWeapon, sizeof(masterWeapon));
+	if (GetConVarBool(customguns_autogive))
+	{
+		for (int i = 0; i < size; i++)
+		{
+			char masterWeapon[32];
+			GetArrayString(gunGiveMasterWeapon, i, masterWeapon, sizeof(masterWeapon));
 
-	// 		if (StrEqual(masterWeapon, sWeapon))
-	// 		{
-	// 			addToInventoryIndex(client, i);
-	// 		}
-	// 	}
-	// }
+			if (StrEqual(masterWeapon, sWeapon))
+			{
+				addToInventoryIndex(client, i);
+			}
+		}
+	}
 
 	// equip binded weapon
 	for (int i = 0; i < size; i++)
@@ -67,29 +65,26 @@ public OnWeaponSwitchPost(client, weapon)
 			}
 		}
 	}
-	// Force client netprop to be visible
-	SetEntProp(client, Prop_Data, "m_bDrawViewmodel", 1);
 }
 
 public OnWeaponEquipPost(client, weapon)
 {
-	PrintToServer("[CG HOOK] OnWeaponEquipPost %d %d", client, weapon);
-	// if (GetConVarBool(customguns_autogive))
-	// {
-	// 	char sWeapon[32];
-	// 	GetEdictClassname(weapon, sWeapon, sizeof(sWeapon));
-	// 	int size = GetArraySize(gunClassNames);
-	// 	for (int i = 0; i < size; i++)
-	// 	{
-	// 		char masterWeapon[32];
-	// 		GetArrayString(gunGiveMasterWeapon, i, masterWeapon, sizeof(masterWeapon));
+	if (GetConVarBool(customguns_autogive))
+	{
+		char sWeapon[32];
+		GetEdictClassname(weapon, sWeapon, sizeof(sWeapon));
+		int size = GetArraySize(gunClassNames);
+		for (int i = 0; i < size; i++)
+		{
+			char masterWeapon[32];
+			GetArrayString(gunGiveMasterWeapon, i, masterWeapon, sizeof(masterWeapon));
 
-	// 		if (StrEqual(masterWeapon, sWeapon))
-	// 		{
-	// 			addToInventoryIndex(client, i);
-	// 		}
-	// 	}
-	// }
+			if (StrEqual(masterWeapon, sWeapon))
+			{
+				addToInventoryIndex(client, i);
+			}
+		}
+	}
 }
 
 public Action vmSwapDelay(Handle timer, any data)
@@ -103,7 +98,6 @@ public Action vmSwapDelay(Handle timer, any data)
 // Kind of a hack: If we're giving a weapon to player, override its default ammo with our saved ammo from inventory if any. Otherwise, do nothing.
 public MRESReturn GetDefaultClip1(int weapon, Handle hReturn)
 {
-	PrintToServer("[CG HOOK] GetDefaultClip1");
 	if (IsPlayer(CLIENT_BEING_EQUIPPED))
 	{
 		int gunIndex = getIndexEnt(weapon);
@@ -120,7 +114,6 @@ public MRESReturn GetDefaultClip1(int weapon, Handle hReturn)
 // float CBaseCombatWeapon::GetFireRate( void )
 public MRESReturn GetFireRate(int weapon, Handle hReturn)
 {
-	PrintToServer("[CG HOOK] GetFireRate");
 	DHookSetReturn(hReturn, GetArrayCell(gunRof, getIndexEnt(weapon)));
 	return MRES_Supercede;
 }
@@ -128,7 +121,6 @@ public MRESReturn GetFireRate(int weapon, Handle hReturn)
 // void CBaseCombatWeapon::AddViewKick( void )
 public MRESReturn AddViewKick(int weapon)
 {
-	PrintToServer("[CG HOOK] AddViewKick");
 	int client = GetOwner(weapon);
 	if (IsPlayer(client))
 	{
@@ -163,7 +155,6 @@ public MRESReturn AddViewKick(int weapon)
 */
 public MRESReturn FireBullets(int client, Handle hParams)
 {
-	PrintToChatAll("[CG HOOK] FireBullets");
 	// check if client is firing custom gun
 	if (selectedGunIndex[client] != -1 && gunEnt[client] != -1)
 	{
@@ -193,10 +184,8 @@ public MRESReturn FireBullets(int client, Handle hParams)
 // This is a fix to allow player model animations/poses for unknown guns
 public MRESReturn TranslateActivity(int client, Handle hReturn, Handle hParams)
 {
-	PrintToServer("Translate Activity Check: %d, %d", gunEnt[client], selectedGunIndex[client]);
 	if (gunEnt[client] != -1 && selectedGunIndex[client] != -1)
 	{
-		PrintToServer("[CG HOOK] TranslateActivity, %d, %d", client, selectedGunIndex[client]);
 		char animPrefix[32];
 		GetArrayString(gunAnimPrefix, selectedGunIndex[client], animPrefix, sizeof(animPrefix));
 		Activity resolved = resolveAnimFor(animPrefix, DHookGetParam(hParams, 1));
@@ -223,7 +212,6 @@ struct animevent_t
 // void CBaseCombatWeapon::Operator_HandleAnimEvent( animevent_t *pEvent, CBaseCombatCharacter *pOperator )
 public MRESReturn Operator_HandleAnimEvent(int weapon, Handle hParams)
 {
-	PrintToServer("[CG HOOK] Operator_HandleAnimEvent");
 	int client = DHookGetParam(hParams, 2);
 	if (IsPlayer(client))
 	{
@@ -237,7 +225,6 @@ public MRESReturn Operator_HandleAnimEvent(int weapon, Handle hParams)
 // bool CBasePlayer::BumpWeapon( CBaseCombatWeapon *pWeapon )
 public MRESReturn BumpWeapon(int client, Handle hReturn, Handle hParams)
 {
-	PrintToServer("[CG HOOK] BumpWeapon");
 	int gun = DHookGetParam(hParams, 1);
 	int gunIndex = getIndexEnt(gun);
 
@@ -247,8 +234,7 @@ public MRESReturn BumpWeapon(int client, Handle hReturn, Handle hParams)
 		// Can this be added to player's inventory?
 		if (addToInventoryIndex(client, gunIndex))
 		{
-			// Gun has been put in player's inventory,
-			// Remove entity from world
+			// Player put the gun in his inventory
 
 			SDKCall(CALL_CheckRespawn, gun);
 
@@ -256,7 +242,6 @@ public MRESReturn BumpWeapon(int client, Handle hReturn, Handle hParams)
 			DHookSetReturn(hReturn, 1);
 			return MRES_Supercede;
 		}
-		/* FOF doesn't really have 'ammo' like this
 		else if (pickAmmoFromWeapon(client, gun)) {
 			// Grabbed the ammo instead
 			// CHL2MP_Player behavior : If we have room for the ammo, then "take" the weapon too.
@@ -267,7 +252,7 @@ public MRESReturn BumpWeapon(int client, Handle hReturn, Handle hParams)
 			DHookSetReturn(hReturn, 1);
 			return MRES_Supercede;
 
-			
+			/*
 			// CBasePlayer behavior
 			// check for ammo left
 
@@ -282,9 +267,9 @@ public MRESReturn BumpWeapon(int client, Handle hReturn, Handle hParams)
 			DHookSetReturn(hReturn, 1);
 			return MRES_Supercede;
 
-			
+			*/
 		}
-		*/
+
 		DHookSetReturn(hReturn, 0);
 		return MRES_Supercede;
 	}
@@ -296,7 +281,6 @@ public MRESReturn BumpWeapon(int client, Handle hReturn, Handle hParams)
 // This is where we give new weapon because we run out of ammo
 public MRESReturn ReloadOrSwitchWeapons(int weapon, Handle hReturn)
 {
-	PrintToServer("[CG HOOK] ReloadOrSwitchWeapons");
 	int owner = GetOwner(weapon);
 	int prim = GetEntProp(weapon, Prop_Send, "m_iPrimaryAmmoType");
 	int sec = GetEntProp(weapon, Prop_Send, "m_iSecondaryAmmoType");
@@ -348,7 +332,6 @@ public MRESReturn ReloadOrSwitchWeapons(int weapon, Handle hReturn)
 // bool CBaseCombatWeapon::Reload( void )
 public MRESReturn Reload(int weapon, Handle hReturn)
 {
-	PrintToServer("[CG HOOK] Reload");
 	if (DHookGetReturn(hReturn))
 	{
 		// fix reload sound not playing
@@ -367,7 +350,6 @@ public MRESReturn Reload(int weapon, Handle hReturn)
 // Handles spinup anim (fire delay) on appropriate guns by delaying next attack
 public MRESReturn ItemPostFrame(int weapon)
 {
-	// PrintToServer("[CG HOOK] ItemPostFrame"); This gets called all the time
 	int client = GetOwner(weapon);
 	if (IsPlayer(client))
 	{
@@ -381,7 +363,6 @@ public MRESReturn ItemPostFrame(int weapon)
 
 		if (type == GunType_Throwable)
 		{
-			PrintToServer("[CG HOOK] ItemPostFrame Throwable");
 			return Throwable_ItemPostFrame(weapon, index, client);
 		}
 		else if (type == GunType_Bullet)
@@ -411,7 +392,6 @@ public MRESReturn ItemPostFrame(int weapon)
 				{
 					if (!(buttons & IN_ATTACK) || GetEntPropFloat(weapon, Prop_Data, "m_fFireDuration") <= 0.0)
 					{  // spinup cancelled by player (unpressed button)
-						PrintToServer("[CG HOOK] ItemPostFrame Bullet SpinUp Cancelled")
 						SDKCall(CALL_StopWeaponSound, weapon, SPECIAL1);
 						SDKCall(CALL_SendWeaponAnim, weapon, ACT_VM_IDLE);
 						inSpinUp[client] = false;
@@ -427,7 +407,6 @@ public MRESReturn ItemPostFrame(int weapon)
 			{
 				if (!(buttons & IN_ATTACK))
 				{
-					PrintToServer("[CG HOOK] ItemPostFrame Bullet Semi-Auto")
 					SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", curtime - 0.1);
 				}
 			}
@@ -436,7 +415,6 @@ public MRESReturn ItemPostFrame(int weapon)
 		else if (!GetArrayCell(gunCustomKeepAmmo, index)) {
 			if ((GetClientButtons(client) & IN_ATTACK) && GetGameTime() > GetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack"))
 			{
-				PrintToServer("[CG HOOK] ItemPostFrame Custom PrimaryAttack")
 				Call_StartForward(PrimaryAttackForward);
 				Call_PushCell(client);
 				Call_PushCell(weapon);
@@ -444,7 +422,6 @@ public MRESReturn ItemPostFrame(int weapon)
 			}
 			else if ((GetClientButtons(client) & IN_ATTACK2) && GetGameTime() > GetEntPropFloat(weapon, Prop_Send, "m_flNextSecondaryAttack"))
 			{
-				PrintToServer("[CG HOOK] ItemPostFrame Custom SecondaryAttack")
 				Call_StartForward(SecondaryAttackForward);
 				Call_PushCell(client);
 				Call_PushCell(weapon);
@@ -459,7 +436,6 @@ public MRESReturn ItemPostFrame(int weapon)
 // Loop sound handler
 public MRESReturn ItemPostFramePost(int weapon)
 {
-	PrintToServer("[CG HOOK] ItemPostFramePost");
 	int client = GetOwner(weapon);
 	if (IsPlayer(client))
 	{
@@ -476,7 +452,6 @@ public MRESReturn ItemPostFramePost(int weapon)
 // void CBaseCombatWeapon::PrimaryAttack( void )
 public MRESReturn PrimaryAttack(int weapon)
 {
-	PrintToServer("[CG HOOK] PrimaryAttack");
 	int client = GetOwner(weapon);
 	if (IsPlayer(client))
 	{
@@ -517,7 +492,6 @@ public MRESReturn PrimaryAttack(int weapon)
 // void CBaseCombatWeapon::SecondaryAttack( void )
 public MRESReturn SecondaryAttack(int weapon)
 {
-	PrintToServer("[CG HOOK] SecondaryAttack");
 	int client = GetOwner(weapon);
 	if (IsPlayer(client))
 	{
@@ -541,18 +515,9 @@ public MRESReturn SecondaryAttack(int weapon)
 public MRESReturn Drop(int weapon)
 {
 	int client = GetOwner(weapon);
-	if (IsPlayer(client) && isCustom(weapon))
+	if (IsPlayer(client))
 	{
-		// Check if the player's inventory is already clear
-		if (selectedGunIndex[client] == -1) {
-			PrintToServer("[CG Hook] Preventing infinite recursion in Drop");
-			return MRES_Ignored;
-		}
-		
-		// Remove custom weapon from inventory
-		clearInventory(client, true);
-		SDKHooks_DropWeapon(client, weapon);
-		return MRES_Supercede
+		clearInventory(client);
 	}
 	return MRES_Ignored;
 }
@@ -560,7 +525,6 @@ public MRESReturn Drop(int weapon)
 // bool CBaseCombatWeapon::Holster( CBaseCombatWeapon *pSwitchingTo )
 public MRESReturn Holster(int weapon, Handle hReturn, Handle hParams)
 {
-	PrintToServer("[CG HOOK] Holster");
 	// this makes minigun types play spinup animation when switched to while holding fire button. The game doesn't reset this itself for some reason..
 	SetEntPropFloat(weapon, Prop_Data, "m_fFireDuration", 0.0);
 
@@ -570,8 +534,6 @@ public MRESReturn Holster(int weapon, Handle hReturn, Handle hParams)
 		int index = getIndexEnt(weapon);
 		GunType type = getType(index);
 
-		//SetEntProp(client, Prop_Data, "m_bPredictWeapons", true); // this might be breaking it - BKR
-		SetEntProp(client, Prop_Data, "m_bPredictWeapons", false); 
 		updateWeaponInventoryAmmo(weapon, index, client);
 
 		if (type == GunType_Throwable)
@@ -601,7 +563,6 @@ public MRESReturn Holster(int weapon, Handle hReturn, Handle hParams)
 // void CBaseCombatWeapon:WeaponSound( WeaponSound_t sound_type, float soundtime = 0.0f )
 public MRESReturn WeaponSound(int weapon, Handle hParams)
 {
-	PrintToServer("[CG HOOK] WeaponSound");
 	int client = GetOwner(weapon);
 	if (IsPlayer(client) && selectedGunIndex[client] != -1)
 	{

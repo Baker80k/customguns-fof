@@ -6,7 +6,6 @@
 /* weapon means: set only if this weapon is active */
 stock void setWeaponAmmo(int client, int clip, char[] weapon = "")
 {
-	PrintToServer("[CG Stocks] setWeaponAmmo");
 	int gun = GetEntPropEnt(client, Prop_Data, "m_hActiveWeapon");
 	if (gun == -1) return;
 	if (!StrEqual(weapon, ""))
@@ -24,7 +23,6 @@ stock void setWeaponAmmo(int client, int clip, char[] weapon = "")
 /* weapon means: add only if this weapon is active */
 stock void addWeaponAmmo(int client, int clip, char[] weapon = "")
 {
-	PrintToServer("[CG Stocks] addWeaponAmmo");
 	int gun = GetEntPropEnt(client, Prop_Data, "m_hActiveWeapon");
 	if (gun == -1) return;
 	if (!StrEqual(weapon, ""))
@@ -41,7 +39,6 @@ stock void addWeaponAmmo(int client, int clip, char[] weapon = "")
 
 stock int getWeaponAmmo(int client)
 {
-	PrintToServer("[CG Stocks] getWeaponAmmo");
 	return GetEntProp(GetEntPropEnt(client, Prop_Data, "m_hActiveWeapon"), Prop_Send, "m_iClip1");
 }
 
@@ -50,7 +47,6 @@ stock int getWeaponAmmo(int client)
  */
 stock int getClientAmmoOfType(int client, int ammoType)
 {
-	PrintToServer("[CG Stocks] getClientAmmoOfType");
 	if (MAX_AMMO_SLOTS < ammoType < 0)
 	{
 		ThrowError("Ammo type out of range");
@@ -516,7 +512,6 @@ stock void swapVM(int client, bool predicted)
 	int oldVM = GetEntPropEnt(client, Prop_Send, "m_hViewModel");
 	char newClassname[32];
 	newClassname = predicted ? "predicted_viewmodel" : "viewmodel";
-	PrintToServer("[CG Stocks] swapVM, %s", newClassname);
 
 	if (oldVM != -1)
 	{
@@ -541,9 +536,6 @@ stock void swapVM(int client, bool predicted)
 
 	SetEntPropEnt(client, Prop_Send, "m_hViewModel", vm);
 	// ChangeEdictState(client, FindSendPropInfo("CHL2MP_Player", "m_hViewModel"));
-	char spawnedClassName[32];
-	GetEntityClassname(vm, spawnedClassName, 32);
-	PrintToServer("[CG Stocks] swapVM done, %s", spawnedClassName);
 }
 
 stock void VectorMin(const float vec1[3], const float vec2[3], float out[3])

@@ -73,12 +73,11 @@ public void CG_OnPrimaryAttack(int client, int weapon){
 		if(m_bCharging[client]){
 			return;
 		}
-		//SetEntProp(client, Prop_Data, "m_bPredictWeapons", true);
 		//CG_SetPlayerAnimation(client, PLAYER_ATTACK1);
 		CG_PlayPrimaryAttack(weapon);
 		CG_SetNextPrimaryAttack(weapon, GetGameTime() + COOLDOWN_PRIMARY);
 		CG_SetNextSecondaryAttack(weapon, GetGameTime() + COOLDOWN_SECONDARY);
-		//CG_RemovePlayerAmmo(client, weapon, AMMO_COST_PRIMARY);
+		CG_RemovePlayerAmmo(client, weapon, AMMO_COST_PRIMARY);
 		EmitGameSoundToAll("Weapon_Gauss.Single", weapon);
 		
 		PrimaryFire(client, weapon);
@@ -90,11 +89,10 @@ public void CG_OnSecondaryAttack(int client, int weapon){
 	GetEntityClassname(weapon, sWeapon, sizeof(sWeapon));
 	
 	if(StrEqual(sWeapon, CLASSNAME)){
-		
-		//SetEntProp(client, Prop_Data, "m_bPredictWeapons", true); 
-		// if(getClientPrimaryAmmoForWeapon(client, weapon) <= 0){
-		// 	return;
-		// }
+	
+		if(getClientPrimaryAmmoForWeapon(client, weapon) <= 0){
+			return;
+		}
 
 		if (!m_bCharging[client])
 		{
@@ -430,7 +428,7 @@ void TE_SetupGaussExplosion(const float vecOrigin[3], int type, float direction[
 	TE_WriteVector("m_vecDirection", direction);
 }
 
-void DrawBeam(const float startPos[3], const float endPos[3], float width, int startEntity = -1){
+void DrawBeam(const float[3] startPos, const float[3] endPos, float width, int startEntity = -1){
 	//UTIL_Tracer( startPos, endPos, 0, TRACER_DONT_USE_ATTACHMENT, 6500.0, false, "GaussTracer" );
 	int beam = CreateEntityByName("beam");
 	if(beam != -1){
