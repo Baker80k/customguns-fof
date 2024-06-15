@@ -405,10 +405,12 @@ public OnPluginStart()
 
 	cookie_menu_style = RegClientCookie("customguns_style", "CustomGuns menu style cookie", CookieAccess_Public);
 
+	RegAdminCmd("cg", CustomGun, ADMFLAG_ROOT, "Spawns a custom gun by classname");
 	RegAdminCmd("sm_customgun", CustomGun, ADMFLAG_ROOT, "Spawns a custom gun by classname");
 	RegAdminCmd("sm_customguns", CustomGun, ADMFLAG_ROOT, "Spawns a custom gun by classname");
 	RegConsoleCmd("sm_gunmenu", ShowStyleMenu, "Opens customguns wheel style selector");
 	RegAdminCmd("sm_seqtest", SeqTest, ADMFLAG_ROOT, "Viewmodel sequence test");
+	RegAdminCmd("cg_test", TestThing, ADMFLAG_ROOT, "Manually execute some code");
 
 	for (int i = 1; i <= MaxClients; i++)
 	{
@@ -534,6 +536,7 @@ public OnClientPutInServer(int client)
 		SDKHook(client, SDKHook_WeaponSwitch, OnWeaponSwitch);
 		SDKHook(client, SDKHook_WeaponSwitchPost, OnWeaponSwitchPost);
 		SDKHook(client, SDKHook_WeaponEquipPost, OnWeaponEquipPost);
+		SDKHook(client, SDKHook_PostThinkPost, OnPostThinkPost);
 		DHookEntity(DHOOK_FireBullets, false, client);
 		DHookEntity(DHOOK_TranslateActivity, false, client);
 		DHookEntity(DHOOK_BumpWeapon, false, client);
@@ -652,7 +655,7 @@ stock giveCustomGun(client, int index = -1, bool switchTo = false)
 			if (switchTo)
 			{
 				SDKCall(CALL_Weapon_Switch, client, ent, 0);
-				CreateTimer(0.1, deploySound, EntIndexToEntRef(ent));
+				CreateTimer(0.1, deploySound, EntIndexToEntRef(ent)); // this ain't it
 			}
 		}
 		else {
@@ -660,6 +663,7 @@ stock giveCustomGun(client, int index = -1, bool switchTo = false)
 		}
 		CLIENT_BEING_EQUIPPED = -1;
 	}
+	PrintToServer("Custom gun given");
 }
 
 int spawnGun(int index, const float origin[3] = NULL_VECTOR)
@@ -673,7 +677,12 @@ int spawnGun(int index, const float origin[3] = NULL_VECTOR)
 	// weapon_hl2mp_base : the same as above, flickers
 	// basehlcombatweapon : pretty good, but overshadowing with other weapons at slot 0,0
 	// weapon_cubemap : also good, but does not show stock ammo of player (pesky cubemap has -1 clips and no ammotype on client by default)
-	int ent = CreateEntityByName("weapon_cubemap");
+	//int ent = CreateEntityByName("weapon_cubemap"); // instant crash
+	
+	//int ent = CreateEntityByName("weapon_annabelle"); // instant crash
+	int ent = CreateEntityByName("weapon_machete");
+	//int ent = CreateEntityByName("weapon_alyxgun"); // does nothing
+	//int ent = CreateEntityByName("weapon_357");
 	if (ent != -1)
 	{
 		GunType guntype = GetArrayCell(gunType, index);
@@ -727,7 +736,7 @@ int spawnGun(int index, const float origin[3] = NULL_VECTOR)
 
 		char weapon[32];
 		GetArrayString(gunClassNames, index, weapon, sizeof(weapon));
-		DispatchKeyValue(ent, "classname", weapon);
+		DispatchKeyValue(ent, "classname", weapon); // this makes the game think the entity is a new class name
 		DispatchKeyValueFloat(ent, "skin", float(view_as<int>(GetArrayCell(gunSkin, index))));
 		DispatchSpawn(ent);
 		ActivateEntity(ent);
@@ -750,6 +759,7 @@ int spawnGun(int index, const float origin[3] = NULL_VECTOR)
 
 		TeleportEntity(ent, origin, NULL_VECTOR, NULL_VECTOR);
 	}
+	PrintToServer("Spawned Gun");
 	return ent;
 }
 
@@ -790,6 +800,7 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
 			if (IsClientInGame(client) && IsPlayerAlive(client))
 			{
 				onMenuClosing(client);
+				PrintToServer("menu closed");
 			}
 			open[client] = false;
 		}
@@ -802,5 +813,38 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
 		// check scope
 		ScopeThink(client, buttons, gunIndex, open[client]);
 	}
+	// It's keeping the 'vewimodel' class
+	// int offset = FindDataMapOffs(client, "m_hViewModel");
+	// int vm = GetEntDataEnt2(client, offset)
+	// char classname[32];
+	// GetEntityClassname(vm, classname, 32);
+	// PrintToServer("Classname: %s", classname);
+
 	return Plugin_Continue;
+}
+
+
+
+public Action TestThing(client, args) {
+	int ent = CreateEntityByName("weapon_cubemap");
+	
+
+	PrintToServer("Test %d", ent);
+	
+	DHookEntity(DHOOK_Holster, true, ent);
+	DHookEntity(DHOOK_GetDefaultClip1, true, ent);
+	DHookEntity(DHOOK_SecondaryAttack, false, ent);
+	DHookEntity(DHOOK_Drop, false, ent);
+	DHookEntity(DHOOK_GetFireRate, false, ent);
+	DHookEntity(DHOOK_AddViewKick, false, ent);
+	DHookEntity(DHOOK_ReloadOrSwitchWeapons, true, ent);
+	DHookEntity(DHOOK_Reload, true, ent);
+	DHookEntity(DHOOK_PrimaryAttack, true, ent);
+	DHookEntity(DHOOK_ItemPostFrame, false, ent);
+	DHookEntity(DHOOK_ItemPostFramePost, true, ent);
+	DHookEntity(DHOOK_WeaponSound, false, ent);
+	DispatchSpawn(ent);
+	ActivateEntity(ent);
+
+	return Plugin_Handled;
 }

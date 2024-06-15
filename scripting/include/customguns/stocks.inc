@@ -511,7 +511,8 @@ stock void swapVM(int client, bool predicted)
 {
 	int oldVM = GetEntPropEnt(client, Prop_Send, "m_hViewModel");
 	char newClassname[32];
-	newClassname = predicted ? "predicted_viewmodel" : "viewmodel";
+	//newClassname = predicted ? "predicted_viewmodel" : "viewmodel";
+	newClassname = "predicted_viewmodel";
 
 	if (oldVM != -1)
 	{
@@ -535,7 +536,7 @@ stock void swapVM(int client, bool predicted)
 	DispatchSpawn(vm);
 
 	SetEntPropEnt(client, Prop_Send, "m_hViewModel", vm);
-	// ChangeEdictState(client, FindSendPropInfo("CHL2MP_Player", "m_hViewModel"));
+	//ChangeEdictState(client, FindSendPropInfo("CHL2MP_Player", "m_hViewModel"));
 }
 
 stock void VectorMin(const float vec1[3], const float vec2[3], float out[3])

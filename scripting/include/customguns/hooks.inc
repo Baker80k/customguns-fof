@@ -87,6 +87,37 @@ public OnWeaponEquipPost(client, weapon)
 	}
 }
 
+public OnPostThinkPost(int client) {
+	// Force the client's viewmodel
+	if (IsClientConnected(client) & IsClientInGame(client) & IsPlayerAlive(client)) {
+		//PrintToServer("Post think client %d", client);
+		// get the client's present viewmodel
+		int clientVM = GetEntPropEnt(client, Prop_Send, "m_hViewModel");
+
+		int desiredModel = GetEntProp(clientVM, Prop_Send, "m_nModelIndex");
+
+		// SetEntProp(clientVM, Prop_Send, "m_nModelIndex", desiredModel);
+		//SetEntPropEnt(ClientVM[client][1], Prop_Send, "m_hWeapon", GetEntPropEnt(clientVM, Prop_Send, "m_hWeapon"));
+		//SetEntProp(ClientVM[client][1], Prop_Send, "m_nSequence", GetEntProp(ClientVM[client][0], Prop_Send, "m_nSequence"));
+		//SetEntPropFloat(ClientVM[client][1], Prop_Send, "m_flPlaybackRate", GetEntPropFloat(ClientVM[client][0], Prop_Send, "m_flPlaybackRate"));
+		int iButton = GetClientButtons(client);
+
+		// Prevent from flipping on CS:GO
+		if (iButton & IN_ATTACK || iButton & IN_ATTACK2) {
+			SetEntPropFloat(client, Prop_Data, "m_flNextAttack", 0.0);
+		}
+		else {
+			SetEntPropFloat(client, Prop_Data, "m_flNextAttack", 999.0);
+		}
+		
+		// SetEntProp(clientVM, Prop_Send, "m_nSequence", GetEntProp(clientVM, Prop_Send, "m_nSequence")); // (BUG FIX)
+		// SetEntProp(clientVM, Prop_Send, "m_nModelIndex", desiredModel);
+		// SetEntProp(clientVM, Prop_Send, "m_nSequence", GetEntProp(clientVM, Prop_Send, "m_nSequence")); // (BUG FIX)
+		// ChangeEdictState(clientVM, FindDataMapOffs(clientVM, "m_nModelIndex"));
+		// SetEntProp(clientVM, Prop_Send, "m_nSequence", GetEntProp(clientVM, Prop_Send, "m_nSequence")); // (BUG FIX)
+	}
+}
+
 public Action vmSwapDelay(Handle timer, any data)
 {
 	if (IsValidEntity(data))
@@ -184,6 +215,7 @@ public MRESReturn FireBullets(int client, Handle hParams)
 // This is a fix to allow player model animations/poses for unknown guns
 public MRESReturn TranslateActivity(int client, Handle hReturn, Handle hParams)
 {
+	//PrintToServer("TranslateActivity");
 	if (gunEnt[client] != -1 && selectedGunIndex[client] != -1)
 	{
 		char animPrefix[32];
