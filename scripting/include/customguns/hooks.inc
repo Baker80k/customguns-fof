@@ -87,6 +87,30 @@ public OnWeaponEquipPost(client, weapon)
 	}
 }
 
+// public OnThinkPost(client) {
+// 	int ent;
+// }
+
+// This is one possible workaround for prediction, however viewmodels still flicker
+// and it also breaks the automatic reload functionality
+// public OnThinkPost(client) {
+// 	if (!IsFakeClient(client) && IsPlayerAlive(client)){
+// 		char sWeapon[32];
+// 		GetClientWeapon(client, sWeapon, sizeof(sWeapon));
+// 		int gunIndex = getIndex(sWeapon);
+
+// 		if (gunIndex != -1) {
+// 			// Only do the weird no-predict things if the gun is custom
+// 			int iButton = GetClientButtons(client);
+// 			if(iButton & IN_ATTACK || iButton & IN_ATTACK2 || iButton & IN_RELOAD)
+// 			SetEntPropFloat(client, Prop_Data, "m_flNextAttack", 0.0);
+// 			else
+// 			SetEntPropFloat(client, Prop_Data, "m_flNextAttack", 999.0);
+// 		}
+// 	}
+// 	int ent;
+// }
+
 public Action vmSwapDelay(Handle timer, any data)
 {
 	if (IsValidEntity(data))
@@ -515,9 +539,17 @@ public MRESReturn SecondaryAttack(int weapon)
 public MRESReturn Drop(int weapon)
 {
 	int client = GetOwner(weapon);
-	if (IsPlayer(client))
+	if (IsPlayer(client) && isCustom(weapon))
 	{
+		if (selectedGunIndex[client] == -1) {
+			PrintToServer("[CG Hook] Preventing infinite recursion in Drop");
+			return MRES_Ignored;
+		}
+		PrintToServer("[CG] Dropping custom weapon %d", client);
 		clearInventory(client);
+
+		SDKHooks_DropWeapon(client, weapon);
+		return MRES_Supercede;
 	}
 	return MRES_Ignored;
 }
