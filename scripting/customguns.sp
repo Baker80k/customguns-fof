@@ -396,6 +396,7 @@ public OnPluginStart()
 	customguns_order_alphabetically = CreateConVar("customguns_order_alphabetically", "1", "If enabled, orders weapons by name in the menu, rather than the order they were picked up. Only applies to dynamic wheel mode", _, true, 0.0, true, 1.0);
 	customguns_autogive = CreateConVar("customguns_autogive", "1", "Globally enables/disables auto-giving of all custom weapons", _, true, 0.0, true, 1.0);
 	customguns_static_wheel = CreateConVar("customguns_static_wheel", "1", "Enables stationary item placement in the radial menu (1) versus dynamic placement and resizing (0)", _, true, 0.0, true, 1.0);
+	customguns_allow_menu = CreateConVar("customguns_allow_menu", "0", "Enable weapon selection menu.", _, true, 0.0, true, 1.0);
 	HookConVarChange(customguns_static_wheel, WheelModeChanged);
 
 	PrimaryAttackForward = CreateGlobalForward("CG_OnPrimaryAttack", ET_Ignore, Param_Cell, Param_Cell);
@@ -772,7 +773,7 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
 		int gunIndex = getIndex(sWeapon);
 
 		// handle opening/closing menu
-		if (!open[client] && IsPlayerAlive(client) && !zooming(client) && inventory[client] && GetArraySize(inventory[client]) > 0 && GetEntProp(client, Prop_Send, "m_iTeamNum") != 1)
+		if (!open[client] && IsPlayerAlive(client) && !zooming(client) && inventory[client] && GetArraySize(inventory[client]) > 0 && GetEntProp(client, Prop_Send, "m_iTeamNum") != 1 && customguns_allow_menu)
 		{
 			if (buttons & IN_ATTACK3)
 			{
@@ -813,12 +814,6 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
 		// check scope
 		ScopeThink(client, buttons, gunIndex, open[client]);
 	}
-	// It's keeping the 'vewimodel' class
-	// int offset = FindDataMapOffs(client, "m_hViewModel");
-	// int vm = GetEntDataEnt2(client, offset)
-	// char classname[32];
-	// GetEntityClassname(vm, classname, 32);
-	// PrintToServer("Classname: %s", classname);
 
 	return Plugin_Continue;
 }
