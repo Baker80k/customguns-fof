@@ -5,13 +5,25 @@
 
 public Action OnWeaponSwitch(client, weapon)
 {
+	int oldDynamic = dynamicProps[client];
+	if (IsValidEntity(oldDynamic))
+	{
+		//AcceptEntityInput(oldDynamic, "kill"); // switching weapons, remove old dynamic prop
+		AcceptEntityInput(oldDynamic, "turnOff");
+	}
+	char viewmodel[PLATFORM_MAX_PATH];
 	if (isCustom(weapon))
 	{
-		swapVM(client, false);
+		int gunIndex = selectedGunIndex[client];
+		int dynamic = GetArrayCell(useDynamic, gunIndex);
+		if (dynamic == 1) {
+			GetArrayString(gunViewmodels, gunIndex, viewmodel, sizeof(viewmodel));
+		}
+		dynamicProps[client] = swapVM(client, true, dynamic, viewmodel);
 		CreateTimer(0.1, vmSwapDelay, EntIndexToEntRef(weapon), TIMER_FLAG_NO_MAPCHANGE);
 	}
 	else {
-		swapVM(client, true);
+		dynamicProps[client] = swapVM(client, false, 0, viewmodel);
 	}
 
 	return Plugin_Continue;

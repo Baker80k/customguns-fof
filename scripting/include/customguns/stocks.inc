@@ -507,36 +507,65 @@ stock void MarkSurrBoundsDirty(int entity)
 	SetEntProp(entity, Prop_Data, "m_iEFlags", GetEntProp(entity, Prop_Data, "m_iEFlags") | EFL_DIRTY_SURR_COLLISION_BOUNDS);
 }
 
-stock void swapVM(int client, bool predicted)
+stock int swapVM(int client, bool custom, int dynamic, char viewmodel[PLATFORM_MAX_PATH])
 {
 	int oldVM = GetEntPropEnt(client, Prop_Send, "m_hViewModel");
-	char newClassname[32];
-	//newClassname = predicted ? "predicted_viewmodel" : "viewmodel";
-	newClassname = "predicted_viewmodel";
 
-	if (oldVM != -1)
-	{
-		char sOld[32];
-		GetEntityClassname(oldVM, sOld, sizeof(sOld));
-		if (StrEqual(sOld, newClassname))
+	if (!custom || dynamic == 0)
+	{	
+		// not a custom weapon, doesn't use dynamic prop
+		PrintToServer("Using predicted viewmodel");
+		char newClassname[32];
+		//newClassname = predicted ? "predicted_viewmodel" : "viewmodel"; // regular viewmodel doesn't work
+		newClassname = "predicted_viewmodel";
+
+		if (oldVM != -1)
 		{
-			return;
+			char sOld[32];
+			GetEntityClassname(oldVM, sOld, sizeof(sOld));
+			if (StrEqual(sOld, newClassname))
+			{
+				return -1;
+			}
+			AcceptEntityInput(oldVM, "kill");
 		}
-		AcceptEntityInput(oldVM, "kill");
+
+		int vm = CreateEntityByName(newClassname);
+
+		float vec[3];
+		GetClientAbsOrigin(client, vec);
+		TeleportEntity(vm, vec, NULL_VECTOR, NULL_VECTOR);
+
+		SetEntPropEnt(vm, Prop_Send, "m_hOwner", client);
+		SetEntProp(vm, Prop_Send, "m_nViewModelIndex", 0);
+		DispatchSpawn(vm);
+
+		SetEntPropEnt(client, Prop_Send, "m_hViewModel", vm);
+		// ChangeEdictState(client, FindSendPropInfo("CHL2MP_Player", "m_hViewModel"));
+		return -1;
 	}
+	else
+	{
+		// custom weapon using dynamic prop
+		PrintToServer("Making dynamic prop viewmodel");
+		setViewmodelVisible(client, false);
 
-	int vm = CreateEntityByName(newClassname);
-
-	float vec[3];
-	GetClientAbsOrigin(client, vec);
-	TeleportEntity(vm, vec, NULL_VECTOR, NULL_VECTOR);
-
-	SetEntPropEnt(vm, Prop_Send, "m_hOwner", client);
-	SetEntProp(vm, Prop_Send, "m_nViewModelIndex", 0);
-	DispatchSpawn(vm);
-
-	SetEntPropEnt(client, Prop_Send, "m_hViewModel", vm);
-	// ChangeEdictState(client, FindSendPropInfo("CHL2MP_Player", "m_hViewModel"));
+		int prop = CreateEntityByName("prop_dynamic_override");
+		DispatchKeyValue(prop, "model", viewmodel);
+		DispatchKeyValue(prop, "disablereceiveshadows", "1");
+		DispatchKeyValue(prop, "disableshadows", "1");
+		DispatchKeyValue(prop, "solid", "0");
+		
+		DispatchSpawn(prop);
+		SetEntityMoveType(prop, MOVETYPE_NONE); // Needed to animate
+		SetVariantString("!activator");
+		AcceptEntityInput(prop, "SetParent", oldVM);
+		int EF_BONEMERGE = 0x001; // https://developer.valvesoftware.com/wiki/EF_BONEMERGE
+		SetEntProp(prop, Prop_Send, "m_fEffects", EF_BONEMERGE); // Also needed to animate
+		
+		ReplyToCommand(client, "Created fake viewmodel %d", prop);
+		return prop;
+	}
 }
 
 stock void VectorMin(const float vec1[3], const float vec2[3], float out[3])

@@ -21,7 +21,9 @@ Handle gunNames;
 Handle gunAnimPrefix;
 Handle gunType;
 Handle fofBase;
+Handle useDynamic;
 Handle gunModels;
+Handle gunViewmodels;
 Handle gunModelIndexes;
 Handle gunSkin;
 Handle gunAdminLevel;
@@ -66,6 +68,7 @@ float startEyeAngles[MAXPLAYERS + 1][3];
 int gunEnt[MAXPLAYERS + 1] = { -1, ... };
 int selectedGunIndex[MAXPLAYERS + 1] = { -1, ... };
 int preferedGunIndex[MAXPLAYERS + 1] = { -1, ... };
+int dynamicProps[MAXPLAYERS + 1] = { -1, ... };
 
 Handle inventory[MAXPLAYERS + 1];
 Handle inventoryWheel[MAXPLAYERS + 1];

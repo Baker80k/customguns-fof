@@ -7,8 +7,8 @@
 #include <customguns/activity_list>
 #include <customguns/drawingtools>
 #include <customguns/const>
-#include <customguns/stocks>
 #include <customguns/globals>
+#include <customguns/stocks>
 
 #include <customguns/styles>
 #include <customguns/hooks>
@@ -352,8 +352,10 @@ public OnPluginStart()
 	gunNames = CreateArray(32);
 	gunModels = CreateArray(PLATFORM_MAX_PATH);
 	gunSkin = CreateArray();
+	gunViewmodels = CreateArray(PLATFORM_MAX_PATH);
 	gunType = CreateArray();
-	fofBase = CreateArray();
+	fofBase = CreateArray(32);
+	useDynamic = CreateArray();
 	gunDmg = CreateArray();
 	gunAnimPrefix = CreateArray(32);
 	gunType = CreateArray();
@@ -412,6 +414,7 @@ public OnPluginStart()
 	RegAdminCmd("sm_customguns", CustomGun, ADMFLAG_ROOT, "Spawns a custom gun by classname");
 	RegConsoleCmd("sm_gunmenu", ShowStyleMenu, "Opens customguns wheel style selector");
 	RegAdminCmd("sm_seqtest", SeqTest, ADMFLAG_ROOT, "Viewmodel sequence test");
+	RegAdminCmd("cg_test", CGTest, ADMFLAG_ROOT, "Test functionality");
 
 	for (int i = 1; i <= MaxClients; i++)
 	{
@@ -679,28 +682,11 @@ int spawnGun(int index, const float origin[3] = NULL_VECTOR)
 	// basehlcombatweapon : pretty good, but overshadowing with other weapons at slot 0,0
 	// weapon_cubemap : also good, but does not show stock ammo of player (pesky cubemap has -1 clips and no ammotype on client by default)
 	// int ent = CreateEntityByName("weapon_cubemap");
-	FofBase fofbase = GetArrayCell(fofBase, index);
-	PrintToServer("Fofbase: %d", fofbase)
-	int ent = -1;
-	if (fofbase == FofBase_Pistol) {
-		ent = CreateEntityByName("weapon_coltnavy");
-		PrintToServer("Pistol selected, %d", ent);
-	}
-	else if (fofbase == FofBase_Melee) {
-		ent = CreateEntityByName("weapon_axe");
-		PrintToServer("Melee selected, %d", ent);
-	}
-	else if (fofbase == FofBase_Large) {
-		ent = CreateEntityByName("weapon_shotgun");
-	}
-	else if (fofbase == FofBase_Zoom) {
-		ent = CreateEntityByName("weapon_sharps");
-	}
-	else if (fofbase == FofBase_Boom) {
-		ent = CreateEntityByName("weapon_dynamite");
-	} else {
-		PrintToServer("Error, entity is %d", ent);
-	}
+	char fofbase[32];
+	GetArrayString(fofBase, index, fofbase, sizeof(fofbase));
+	PrintToServer("Fofbase: %s", fofbase)
+	int ent = CreateEntityByName(fofbase);
+	
 	PrintToServer("Entity: %d", ent);
 
 	if (ent != -1)
@@ -711,16 +697,9 @@ int spawnGun(int index, const float origin[3] = NULL_VECTOR)
 		DHookEntity(DHOOK_Holster, true, ent);
 		DHookEntity(DHOOK_GetDefaultClip1, true, ent);
 
-		if (fofBase == FofBase_Melee) {
-			DHookEntity(DHOOK_SecondaryAttack, true, ent);
-			DHookEntity(DHOOK_Drop, true, ent);
-		}
-		else {
-			DHookEntity(DHOOK_SecondaryAttack, false, ent);
-			DHookEntity(DHOOK_Drop, false, ent);
-		}
+		DHookEntity(DHOOK_SecondaryAttack, false, ent);
+		DHookEntity(DHOOK_Drop, false, ent);
 		
-
 		if (guntype == GunType_Bullet)
 		{
 			DHookEntity(DHOOK_GetFireRate, false, ent);
@@ -837,6 +816,44 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
 
 		// check scope
 		ScopeThink(client, buttons, gunIndex, open[client]);
+		// TODO: this shouldn't need to run every frame
+		int clientDynamic = dynamicProps[client];
+		if (clientDynamic != -1) {
+			setViewmodelVisible(client, false);
+		} else {
+			setViewmodelVisible(client, true);
+		}
 	}
+
 	return Plugin_Continue;
+}
+
+public Action CGTest(int client, int args)
+{
+	setViewmodelVisible(client, false);
+	return CreateFakeViewmodel(client, args);
+}
+
+public Action CreateFakeViewmodel(int client, int args)
+{
+	int prop = CreateEntityByName("prop_dynamic_override");
+
+	DispatchKeyValue(prop, "model", "models/weapons/v_bigiron.mdl");
+	DispatchKeyValue(prop, "disablereceiveshadows", "1");
+	DispatchKeyValue(prop, "disableshadows", "1");
+	DispatchKeyValue(prop, "solid", "0");
+	
+	DispatchSpawn(prop);
+
+	SetEntityMoveType(prop, MOVETYPE_NONE); // Needed to animate
+
+	int viewmodel = GetEntPropEnt(client, Prop_Data, "m_hViewModel", 0);
+
+	SetVariantString("!activator");
+	AcceptEntityInput(prop, "SetParent", viewmodel);
+	int EF_BONEMERGE = 0x001; // https://developer.valvesoftware.com/wiki/EF_BONEMERGE
+	SetEntProp(prop, Prop_Send, "m_fEffects", EF_BONEMERGE); // Also needed to animate
+
+	ReplyToCommand(client, "Created fake viewmodel %d", prop);
+	return Plugin_Handled;
 }
