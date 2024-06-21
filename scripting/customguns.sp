@@ -23,7 +23,7 @@ public Plugin myinfo =
 {
 	name = "Custom guns",
 	author = "Alienmario",
-	description = "Custom guns plugin for HL2DM",
+	description = "Custom guns plugin for FoF",
 	version = PLUGIN_VERSION
 };
 
