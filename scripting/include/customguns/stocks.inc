@@ -560,6 +560,20 @@ stock int swapVM(int client, bool custom, int dynamic, char viewmodel[PLATFORM_M
 		SetEntityMoveType(prop, MOVETYPE_NONE); // Needed to animate
 		SetVariantString("!activator");
 		AcceptEntityInput(prop, "SetParent", oldVM);
+
+
+		// bool check;
+		// float vPos[3];
+		// GetClientEyePosition(client, vPos);
+		// PrintToServer("Viewmodel is at %d, %d, %d", vPos[0], vPos[1], vPos[2]);
+		// float vOffsets[3] = {0.0,100.0,0.0};
+		// AddVectors(vPos, vOffsets, vPos);
+		// TeleportEntity(prop, vPos, NULL_VECTOR, NULL_VECTOR);
+		// check = AcceptEntityInput(prop, "SetParentAttachmentMaintainOffset", oldVM, prop);
+		// if (check) {
+		// 	PrintToServer("Parent offset!");
+		// }
+
 		int EF_BONEMERGE = 0x001; // https://developer.valvesoftware.com/wiki/EF_BONEMERGE
 		SetEntProp(prop, Prop_Send, "m_fEffects", EF_BONEMERGE); // Also needed to animate
 		

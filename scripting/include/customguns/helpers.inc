@@ -165,7 +165,6 @@ loadConfig()
 						}
 					}
 					delete kv;
-					PrintToServer("ENDING LOAD OF %s", filename);
 				}
 			}
 		}

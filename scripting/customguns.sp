@@ -579,7 +579,16 @@ public void OnSpawn(Handle event, const char[] name, bool dontBroadcast)
 	int client = GetClientOfUserId(GetEventInt(event, "userid"));
 	if (!IsFakeClient(client))
 	{
+		
 		selectedGunIndex[client] = -1;
+		if (inventory[client])
+		{
+			ClearArray(inventory[client]);
+			ClearArray(inventoryWheel[client]);
+			ClearArray(inventoryAnimScale[client]);
+			ClearArray(inventoryAmmo[client]);
+			ClearArray(inventoryAmmoType[client]);
+		}
 		if (GetConVarBool(customguns_autogive))
 		{
 			addSpawnWeapons(client);
@@ -816,13 +825,17 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
 
 		// check scope
 		ScopeThink(client, buttons, gunIndex, open[client]);
+		
 		// TODO: this shouldn't need to run every frame
-		int clientDynamic = dynamicProps[client];
-		if (clientDynamic != -1) {
-			setViewmodelVisible(client, false);
-		} else {
-			setViewmodelVisible(client, true);
+		if (IsPlayerAlive(client)) {
+			int clientDynamic = dynamicProps[client];
+			if (clientDynamic != -1) {
+				setViewmodelVisible(client, false);
+			} else {
+				setViewmodelVisible(client, true);
+			}
 		}
+
 	}
 
 	return Plugin_Continue;
@@ -849,10 +862,24 @@ public Action CreateFakeViewmodel(int client, int args)
 
 	int viewmodel = GetEntPropEnt(client, Prop_Data, "m_hViewModel", 0);
 
+	bool check;
 	SetVariantString("!activator");
-	AcceptEntityInput(prop, "SetParent", viewmodel);
-	int EF_BONEMERGE = 0x001; // https://developer.valvesoftware.com/wiki/EF_BONEMERGE
-	SetEntProp(prop, Prop_Send, "m_fEffects", EF_BONEMERGE); // Also needed to animate
+	check = AcceptEntityInput(prop, "SetParent", viewmodel);
+	if (check) {
+		PrintToServer("Parented prop to viewmodel");
+	}
+	float vPos[3];
+	GetEntPropVector(viewmodel, Prop_Send, "m_vecOrigin", vPos);
+	PrintToServer("Viewmodel is at %d, %d, %d", vPos[0], vPos[1], vPos[2]);
+	float vOffsets[3] = {0.0,100.0,0.0};
+	AddVectors(vPos, vOffsets, vPos);
+	TeleportEntity(prop, vPos, NULL_VECTOR, NULL_VECTOR);
+	check = AcceptEntityInput(prop, "SetParentAttachmentMaintainOffset", viewmodel);
+	if (check) {
+		PrintToServer("Parent offset!");
+	}
+	//int EF_BONEMERGE = 0x001; // https://developer.valvesoftware.com/wiki/EF_BONEMERGE
+	//SetEntProp(prop, Prop_Send, "m_fEffects", EF_BONEMERGE); // Also needed to animate
 
 	ReplyToCommand(client, "Created fake viewmodel %d", prop);
 	return Plugin_Handled;
