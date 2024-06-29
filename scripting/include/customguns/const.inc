@@ -15,7 +15,7 @@ enum GunType
 {
 	GunType_Bullet,
 	GunType_Custom,
-	GunType_Throwable
+	GunType_Throwable,
 }
 
 enum trailType

@@ -42,6 +42,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, err_max)
 	CreateNative("CG_GetShootPosition", Native_GetShootPosition);
 	CreateNative("CG_RemovePlayerAmmo", Native_RemovePlayerAmmo);
 	CreateNative("CG_RadiusDamage", Native_RadiusDamage);
+	CreateNative("CG_DropWeapon", Native_DisarmWeapon);
 
 	return APLRes_Success;
 }
@@ -140,6 +141,15 @@ public Native_RadiusDamage(Handle plugin, numParams)
 	float origin[3];
 	GetNativeArray(6, origin, sizeof(origin));
 	RadiusDamageHack(GetNativeCell(1), GetNativeCell(2), GetNativeCell(3), GetNativeCell(4), GetNativeCell(5), origin, GetNativeCell(7), GetNativeCell(8));
+}
+
+public Native_DisarmWeapon(Handle plugin, numParams)
+{
+	int weapon = GetNativeCell(1);
+	int client = GetNativeCell(2);
+
+	
+	
 }
 
 public OnPluginStart()
@@ -340,6 +350,8 @@ public OnPluginStart()
 		PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "Weapon_ShootPosition");
 		PrepSDKCall_SetReturnInfo(SDKType_Vector, SDKPass_ByValue);
 		CALL_ShootPosition = EndPrepSDKCall();
+
+
 	}
 
 	CloseHandle(gamedata);
