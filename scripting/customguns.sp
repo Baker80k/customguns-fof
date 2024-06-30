@@ -558,6 +558,7 @@ public OnClientPutInServer(int client)
 		SDKHook(client, SDKHook_WeaponEquipPost, OnWeaponEquipPost);
 		//SDKHook(client, SDKHook_PostThinkPost, OnPostThinkPost); //Hooks for potential prediction fix, see hooks.inc for more
 		//SDKHook(client, SDKHook_ThinkPost, OnThinkPost);
+		SDKHook(client, SDKHook_WeaponCanSwitchTo, WeaponCanSwitchTo);
 		DHookEntity(DHOOK_FireBullets, false, client);
 		DHookEntity(DHOOK_TranslateActivity, false, client);
 		DHookEntity(DHOOK_BumpWeapon, false, client);
@@ -597,6 +598,7 @@ public void OnSpawn(Handle event, const char[] name, bool dontBroadcast)
 	{
 		
 		selectedGunIndex[client] = -1;
+		stuckWeapon[client] = -1;
 		if (inventory[client])
 		{
 			ClearArray(inventory[client]);
@@ -613,6 +615,36 @@ public void OnSpawn(Handle event, const char[] name, bool dontBroadcast)
 			CreateTimer(1.0, tGiveCustomGun, GetEventInt(event, "userid"), TIMER_FLAG_NO_MAPCHANGE);
 		}
 	}
+}
+
+public Action WeaponCanSwitchTo(int client, int weapon) {
+	char sSwitchingWeapon[32];
+	if (!IsValidEntity(weapon)) {
+		PrintToServer("Stuck! Invalid");
+		return Plugin_Handled;
+	}
+	GetEntityClassname(weapon, sSwitchingWeapon, sizeof(sSwitchingWeapon));
+	PrintToServer("Switching to Weapon %s", sSwitchingWeapon);
+	int targetWeapon = stuckWeapon[client];
+	if (targetWeapon != -1) {
+		char sTargetWeapon[32];
+		GetEntityClassname(targetWeapon, sTargetWeapon, sizeof(sTargetWeapon));
+		PrintToServer("Target weapon %s", sTargetWeapon);
+		if (!StrEqual(sSwitchingWeapon, sTargetWeapon, false)) {
+			PrintToServer("Stopped weapon switch!")
+			return Plugin_Handled;
+		}
+	}
+	return Plugin_Continue;
+	// if (stuckWeapon[client] == -1) {
+	// 	stuckWeapon[client] = 0;
+	// 	PrintToServer("Handled");
+	// 	return Plugin_Handled;
+	// } else {
+	// 	stuckWeapon[client] = -1;
+	// 	PrintToServer("Continued");
+	// 	return Plugin_Continue;
+	// }
 }
 
 public void OnDeath(Handle event, const char[] name, bool dontBroadcast)

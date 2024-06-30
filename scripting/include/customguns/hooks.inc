@@ -4,7 +4,28 @@
 #define _CustomGuns_Hooks_included
 
 public Action OnWeaponSwitch(client, weapon)
-{
+{	
+	char sSwitchingWeapon[32];
+	if (!IsValidEntity(weapon)) {
+		PrintToServer("Stuck! Invalid 1");
+		return Plugin_Handled;
+	}
+	GetEntityClassname(weapon, sSwitchingWeapon, sizeof(sSwitchingWeapon));
+	PrintToServer("Switching to Weapon %s", sSwitchingWeapon);
+	int targetWeapon = stuckWeapon[client];
+	if (targetWeapon != -1) {
+		if (!IsValidEntity(targetWeapon)) {
+			PrintToServer("Stuck! Invalid 2");
+			return Plugin_Handled;
+		}
+		char sTargetWeapon[32];
+		GetEntityClassname(targetWeapon, sTargetWeapon, sizeof(sTargetWeapon));
+		PrintToServer("Target weapon %s", sTargetWeapon);
+		if (!StrEqual(sSwitchingWeapon, sTargetWeapon, false)) {
+			PrintToServer("Stopped weapon switch!")
+			return Plugin_Handled;
+		}
+	}
 	int oldDynamic = dynamicProps[client];
 	if (IsValidEntity(oldDynamic))
 	{
@@ -15,14 +36,6 @@ public Action OnWeaponSwitch(client, weapon)
 	if (isCustom(weapon))
 	{
 		int gunIndex = selectedGunIndex[client];
-		int stuck = GetArrayCell(gunStuck, gunIndex);
-		char sWeapon[32];
-		GetEntityClassname(weapon, sWeapon, sizeof(sWeapon));
-		PrintToServer("Weapon %s, stuck %d", sWeapon, stuck);
-		// if (stuck == 1) {
-		// 	PrintToServer("Prevented weapon switch");
-		// 	return Plugin_Handled; // No weapon switching allowed
-		// }
 		int dynamic = GetArrayCell(useDynamic, gunIndex);
 		if (dynamic == 1) {
 			GetArrayString(gunViewmodels, gunIndex, viewmodel, sizeof(viewmodel));
@@ -38,6 +51,28 @@ public Action OnWeaponSwitch(client, weapon)
 
 public OnWeaponSwitchPost(client, weapon)
 {
+	char sSwitchingWeapon[32];
+	if (!IsValidEntity(weapon)) {
+		PrintToServer("Stuck! Invalid 3");
+		return;
+	}
+	GetEntityClassname(weapon, sSwitchingWeapon, sizeof(sSwitchingWeapon));
+	PrintToServer("Switching to Weapon %s", sSwitchingWeapon);
+	int targetWeapon = stuckWeapon[client];
+	if (targetWeapon != -1) {
+		if (!IsValidEntity(targetWeapon)) {
+			//PrintToServer("Stuck! Invalid 4");
+			return;
+		}
+		char sTargetWeapon[32];
+		GetEntityClassname(targetWeapon, sTargetWeapon, sizeof(sTargetWeapon));
+		PrintToServer("Target weapon %s", sTargetWeapon);
+		if (!StrEqual(sSwitchingWeapon, sTargetWeapon, false)) {
+			PrintToServer("Stopped weapon switch Post!")
+			return;
+		}
+	}
+
 	if (isCustom(weapon))
 	{
 		throwableReset(client);
@@ -106,24 +141,25 @@ public OnWeaponEquipPost(client, weapon)
 	}
 }
 
-// This is one possible workaround for prediction, however viewmodels still flicker
-// and it also breaks the automatic reload functionality
-public OnPostThinkPost(client) {
-	if (!IsFakeClient(client) && IsPlayerAlive(client)){
-		char sWeapon[32];
-		GetClientWeapon(client, sWeapon, sizeof(sWeapon));
-		int gunIndex = getIndex(sWeapon);
+// // This is one possible workaround for prediction, however viewmodels still flicker
+// // and it also breaks the automatic reload functionality
+// public OnPostThinkPost(client) {
+// 	// if (!IsFakeClient(client) && IsPlayerAlive(client)){
+// 	// 	char sWeapon[32];
+// 	// 	GetClientWeapon(client, sWeapon, sizeof(sWeapon));
+// 	// 	int gunIndex = getIndex(sWeapon);
 
-		if (gunIndex != -1) {
-			// Only do the weird no-predict things if the gun is custom
-			int iButton = GetClientButtons(client);
-			if(iButton & IN_ATTACK || iButton & IN_ATTACK2 || iButton & IN_RELOAD)
-			SetEntPropFloat(client, Prop_Data, "m_flNextAttack", 0.0);
-			else
-			SetEntPropFloat(client, Prop_Data, "m_flNextAttack", 999.0);
-		}
-	}
-}
+// 	// 	if (gunIndex != -1) {
+// 	// 		// Only do the weird no-predict things if the gun is custom
+// 	// 		int iButton = GetClientButtons(client);
+// 	// 		if(iButton & IN_ATTACK || iButton & IN_ATTACK2 || iButton & IN_RELOAD)
+// 	// 		SetEntPropFloat(client, Prop_Data, "m_flNextAttack", 0.0);
+// 	// 		else
+// 	// 		SetEntPropFloat(client, Prop_Data, "m_flNextAttack", 999.0);
+// 	// 	}
+// 	// }
+// 	// Go back to the stuck weapon, if applicable
+// }
 
 public Action vmSwapDelay(Handle timer, any data)
 {
@@ -280,13 +316,12 @@ public MRESReturn BumpWeapon(int client, Handle hReturn, Handle hParams)
 			DHookSetReturn(hReturn, 1);
 
 			// Check if the weapon is 'stuck' to player
-
 			int stuck = GetArrayCell(gunStuck, gunIndex);
 			if (stuck == 1) {
+				stuckWeapon[client] = gun;
 				char sWeapon[32];
 				GetEntityClassname(gun, sWeapon, sizeof(sWeapon));
 				FakeClientCommand(client, "use %s", sWeapon);
-				//SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", gun);
 			}
 			return MRES_Supercede;
 		}
@@ -531,7 +566,7 @@ public MRESReturn PrimaryAttack(int weapon)
 
 		if (type == GunType_Custom)
 		{
-			PrintToServer("Custom Attack");
+			//PrintToServer("Custom Attack");
 			return MRES_Supercede;
 		}
 	}
@@ -575,6 +610,7 @@ public MRESReturn Drop(int weapon)
 		clearInventory(client);
 
 		SDKHooks_DropWeapon(client, weapon);
+		stuckWeapon[client] = -1;
 		return MRES_Supercede;
 	}
 	return MRES_Ignored;

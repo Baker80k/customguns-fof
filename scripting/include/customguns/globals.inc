@@ -70,6 +70,7 @@ int gunEnt[MAXPLAYERS + 1] = { -1, ... };
 int selectedGunIndex[MAXPLAYERS + 1] = { -1, ... };
 int preferedGunIndex[MAXPLAYERS + 1] = { -1, ... };
 int dynamicProps[MAXPLAYERS + 1] = { -1, ... };
+int stuckWeapon[MAXPLAYERS + 1] = { -1, ... }; 
 
 Handle inventory[MAXPLAYERS + 1];
 Handle inventoryWheel[MAXPLAYERS + 1];
