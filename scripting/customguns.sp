@@ -112,7 +112,10 @@ public int Native_PlayActivity(Handle plugin, numParams)
 public int Native_PlayPrimaryAttack(Handle plugin, numParams)
 {
 	int weapon = GetNativeCell(1);
+	int client = GetOwner(weapon);
+	int prop_ent = dynamicProps[client];
 	SDKCall(CALL_SendWeaponAnim, weapon, ACT_VM_PRIMARYATTACK);
+	SDKCall(CALL_SendViewModelAnim, weapon, ACT_VM_PRIMARYATTACK); // added to make weapon animation play, though flikers a little
 	float curtime = GetGameTime();
 	float seqDuration = GetEntPropFloat(weapon, Prop_Send, "m_flTimeWeaponIdle") - curtime;
 	SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", curtime + seqDuration);
@@ -723,6 +726,7 @@ int spawnGun(int index, const float origin[3] = NULL_VECTOR)
 		
 		if (guntype == GunType_Bullet)
 		{
+			PrintToServer("Bullet Type");
 			DHookEntity(DHOOK_GetFireRate, false, ent);
 			DHookEntity(DHOOK_AddViewKick, false, ent);
 			DHookEntity(DHOOK_ReloadOrSwitchWeapons, true, ent);
@@ -742,6 +746,7 @@ int spawnGun(int index, const float origin[3] = NULL_VECTOR)
 		}
 		else if (guntype == GunType_Throwable)
 		{
+			PrintToServer("Throwable Type");
 			DHookEntity(DHOOK_ItemPostFrame, false, ent);
 			DHookEntity(DHOOK_PrimaryAttack, false, ent);
 			DHookEntity(DHOOK_Operator_HandleAnimEvent, false, ent);
@@ -751,13 +756,19 @@ int spawnGun(int index, const float origin[3] = NULL_VECTOR)
 			if (GetArrayCell(gunCustomKeepAmmo, index))
 			{
 				// game managed ammo and attack functions
+				PrintToServer("Custom Type, Game-Managed Ammo");
 				DHookEntity(DHOOK_ItemPostFrame, false, ent);
 				DHookEntity(DHOOK_PrimaryAttack, false, ent);
 				DHookEntity(DHOOK_ReloadOrSwitchWeapons, true, ent);
 			}
 			else {
 				// plugin managed ammo, attack forwards called manually
+				PrintToServer("Custom Type, Plugin-Managed Ammo");
 				DHookEntity(DHOOK_ItemPostFrame, true, ent);
+				// added in an attempt to stop the base weapon's attack playing
+				DHookEntity(DHOOK_PrimaryAttack, false, ent);
+				DHookEntity(DHOOK_WeaponSound, false, ent);
+				DHookEntity(DHOOK_ItemPostFramePost, false, ent);
 			}
 		}
 

@@ -514,9 +514,11 @@ public MRESReturn PrimaryAttack(int weapon)
 
 		if (type == GunType_Custom)
 		{
+			PrintToServer("Custom Attack");
 			return MRES_Supercede;
 		}
 	}
+	PrintToServer("Regular Attack");
 	return MRES_Ignored;
 }
 
