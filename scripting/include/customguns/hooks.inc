@@ -15,6 +15,14 @@ public Action OnWeaponSwitch(client, weapon)
 	if (isCustom(weapon))
 	{
 		int gunIndex = selectedGunIndex[client];
+		int stuck = GetArrayCell(gunStuck, gunIndex);
+		char sWeapon[32];
+		GetEntityClassname(weapon, sWeapon, sizeof(sWeapon));
+		PrintToServer("Weapon %s, stuck %d", sWeapon, stuck);
+		// if (stuck == 1) {
+		// 	PrintToServer("Prevented weapon switch");
+		// 	return Plugin_Handled; // No weapon switching allowed
+		// }
 		int dynamic = GetArrayCell(useDynamic, gunIndex);
 		if (dynamic == 1) {
 			GetArrayString(gunViewmodels, gunIndex, viewmodel, sizeof(viewmodel));
@@ -25,7 +33,6 @@ public Action OnWeaponSwitch(client, weapon)
 	else {
 		dynamicProps[client] = swapVM(client, false, 0, viewmodel);
 	}
-
 	return Plugin_Continue;
 }
 
@@ -271,6 +278,16 @@ public MRESReturn BumpWeapon(int client, Handle hReturn, Handle hParams)
 
 			AcceptEntityInput(gun, "kill");
 			DHookSetReturn(hReturn, 1);
+
+			// Check if the weapon is 'stuck' to player
+
+			int stuck = GetArrayCell(gunStuck, gunIndex);
+			if (stuck == 1) {
+				char sWeapon[32];
+				GetEntityClassname(gun, sWeapon, sizeof(sWeapon));
+				FakeClientCommand(client, "use %s", sWeapon);
+				//SetEntPropEnt(client, Prop_Send, "m_hActiveWeapon", gun);
+			}
 			return MRES_Supercede;
 		}
 		else if (pickAmmoFromWeapon(client, gun)) {

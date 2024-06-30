@@ -48,6 +48,7 @@ loadConfig()
 							PushArrayString(gunGiveMasterWeapon, buffer);
 							KvGetString(kv, "bind_to_weapon", buffer, 32, "");
 							PushArrayString(gunBind, buffer);
+							PushArrayCell(gunStuck, KvGetNum(kv, "stuck_to_weapon", 0));
 							PushArrayCell(gunPersistent, KvGetNum(kv, "persistent", 0));
 							KvGetString(kv, "admin_level", buffer, sizeof(buffer), "-1");
 							PushArrayCell(gunAdminLevel, StrEqual(buffer, "-1") ? -1 : ReadFlagString(buffer));

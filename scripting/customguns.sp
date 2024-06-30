@@ -389,6 +389,7 @@ public OnPluginStart()
 	gunGive = CreateArray();
 	gunGiveMasterWeapon = CreateArray(32);
 	gunBind = CreateArray(32);
+	gunStuck = CreateArray();
 	gunFireLoopFix = CreateArray();
 	gunFireLoopLength = CreateArray();
 	gunFireVisible = CreateArray();

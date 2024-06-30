@@ -31,6 +31,7 @@ Handle gunPersistent;
 Handle gunGive;
 Handle gunGiveMasterWeapon;
 Handle gunBind;
+Handle gunStuck;
 
 Handle gunDownloads;
 
