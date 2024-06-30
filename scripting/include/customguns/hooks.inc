@@ -4,21 +4,75 @@
 #define _CustomGuns_Hooks_included
 
 public Action OnWeaponSwitch(client, weapon)
-{
+{	
+	char sSwitchingWeapon[32];
+	if (!IsValidEntity(weapon)) {
+		PrintToServer("Stuck! Invalid 1");
+		return Plugin_Handled;
+	}
+	GetEntityClassname(weapon, sSwitchingWeapon, sizeof(sSwitchingWeapon));
+	PrintToServer("Switching to Weapon %s", sSwitchingWeapon);
+	int targetWeapon = stuckWeapon[client];
+	if (targetWeapon != -1) {
+		if (!IsValidEntity(targetWeapon)) {
+			PrintToServer("Stuck! Invalid 2");
+			return Plugin_Handled;
+		}
+		char sTargetWeapon[32];
+		GetEntityClassname(targetWeapon, sTargetWeapon, sizeof(sTargetWeapon));
+		PrintToServer("Target weapon %s", sTargetWeapon);
+		if (!StrEqual(sSwitchingWeapon, sTargetWeapon, false)) {
+			PrintToServer("Stopped weapon switch!")
+			return Plugin_Handled;
+		}
+	}
+	int oldDynamic = dynamicProps[client];
+	if (IsValidEntity(oldDynamic))
+	{
+		//AcceptEntityInput(oldDynamic, "kill"); // switching weapons, remove old dynamic prop
+		AcceptEntityInput(oldDynamic, "turnOff");
+	}
+	char viewmodel[PLATFORM_MAX_PATH];
 	if (isCustom(weapon))
 	{
-		swapVM(client, false);
+		int gunIndex = selectedGunIndex[client];
+		int dynamic = GetArrayCell(useDynamic, gunIndex);
+		if (dynamic == 1) {
+			GetArrayString(gunViewmodels, gunIndex, viewmodel, sizeof(viewmodel));
+		}
+		dynamicProps[client] = swapVM(client, true, dynamic, viewmodel);
 		CreateTimer(0.1, vmSwapDelay, EntIndexToEntRef(weapon), TIMER_FLAG_NO_MAPCHANGE);
 	}
 	else {
-		swapVM(client, true);
+		dynamicProps[client] = swapVM(client, false, 0, viewmodel);
 	}
-
 	return Plugin_Continue;
 }
 
 public OnWeaponSwitchPost(client, weapon)
 {
+	char sSwitchingWeapon[32];
+	if (!IsValidEntity(weapon)) {
+		PrintToServer("Stuck! Invalid 3");
+		return;
+	}
+	GetEntityClassname(weapon, sSwitchingWeapon, sizeof(sSwitchingWeapon));
+	PrintToServer("Switching to Weapon %s", sSwitchingWeapon);
+	int targetWeapon = stuckWeapon[client];
+	if (targetWeapon != -1) {
+		if (!IsValidEntity(targetWeapon)) {
+			//PrintToServer("Stuck! Invalid 4");
+			return;
+		}
+		char sTargetWeapon[32];
+		GetEntityClassname(targetWeapon, sTargetWeapon, sizeof(sTargetWeapon));
+		PrintToServer("Target weapon %s", sTargetWeapon);
+		if (!StrEqual(sSwitchingWeapon, sTargetWeapon, false)) {
+			PrintToServer("Stopped weapon switch Post!")
+			return;
+		}
+	}
+
 	if (isCustom(weapon))
 	{
 		throwableReset(client);
@@ -87,28 +141,24 @@ public OnWeaponEquipPost(client, weapon)
 	}
 }
 
-// public OnThinkPost(client) {
-// 	int ent;
-// }
+// // This is one possible workaround for prediction, however viewmodels still flicker
+// // and it also breaks the automatic reload functionality
+// public OnPostThinkPost(client) {
+// 	// if (!IsFakeClient(client) && IsPlayerAlive(client)){
+// 	// 	char sWeapon[32];
+// 	// 	GetClientWeapon(client, sWeapon, sizeof(sWeapon));
+// 	// 	int gunIndex = getIndex(sWeapon);
 
-// This is one possible workaround for prediction, however viewmodels still flicker
-// and it also breaks the automatic reload functionality
-// public OnThinkPost(client) {
-// 	if (!IsFakeClient(client) && IsPlayerAlive(client)){
-// 		char sWeapon[32];
-// 		GetClientWeapon(client, sWeapon, sizeof(sWeapon));
-// 		int gunIndex = getIndex(sWeapon);
-
-// 		if (gunIndex != -1) {
-// 			// Only do the weird no-predict things if the gun is custom
-// 			int iButton = GetClientButtons(client);
-// 			if(iButton & IN_ATTACK || iButton & IN_ATTACK2 || iButton & IN_RELOAD)
-// 			SetEntPropFloat(client, Prop_Data, "m_flNextAttack", 0.0);
-// 			else
-// 			SetEntPropFloat(client, Prop_Data, "m_flNextAttack", 999.0);
-// 		}
-// 	}
-// 	int ent;
+// 	// 	if (gunIndex != -1) {
+// 	// 		// Only do the weird no-predict things if the gun is custom
+// 	// 		int iButton = GetClientButtons(client);
+// 	// 		if(iButton & IN_ATTACK || iButton & IN_ATTACK2 || iButton & IN_RELOAD)
+// 	// 		SetEntPropFloat(client, Prop_Data, "m_flNextAttack", 0.0);
+// 	// 		else
+// 	// 		SetEntPropFloat(client, Prop_Data, "m_flNextAttack", 999.0);
+// 	// 	}
+// 	// }
+// 	// Go back to the stuck weapon, if applicable
 // }
 
 public Action vmSwapDelay(Handle timer, any data)
@@ -264,6 +314,15 @@ public MRESReturn BumpWeapon(int client, Handle hReturn, Handle hParams)
 
 			AcceptEntityInput(gun, "kill");
 			DHookSetReturn(hReturn, 1);
+
+			// Check if the weapon is 'stuck' to player
+			int stuck = GetArrayCell(gunStuck, gunIndex);
+			if (stuck == 1) {
+				stuckWeapon[client] = gun;
+				char sWeapon[32];
+				GetEntityClassname(gun, sWeapon, sizeof(sWeapon));
+				FakeClientCommand(client, "use %s", sWeapon);
+			}
 			return MRES_Supercede;
 		}
 		else if (pickAmmoFromWeapon(client, gun)) {
@@ -507,9 +566,11 @@ public MRESReturn PrimaryAttack(int weapon)
 
 		if (type == GunType_Custom)
 		{
+			//PrintToServer("Custom Attack");
 			return MRES_Supercede;
 		}
 	}
+	PrintToServer("Regular Attack");
 	return MRES_Ignored;
 }
 
@@ -549,6 +610,7 @@ public MRESReturn Drop(int weapon)
 		clearInventory(client);
 
 		SDKHooks_DropWeapon(client, weapon);
+		stuckWeapon[client] = -1;
 		return MRES_Supercede;
 	}
 	return MRES_Ignored;

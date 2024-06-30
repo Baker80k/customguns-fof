@@ -40,12 +40,15 @@ loadConfig()
 							PushArrayString(gunNames, buffer);
 							KvGetString(kv, "model", buffer, sizeof(buffer), "");
 							PushArrayString(gunModels, buffer);
+							KvGetString(kv, "viewmodel", buffer, sizeof(buffer), "");
+							PushArrayString(gunViewmodels, buffer);
 							PushArrayCell(gunSkin, KvGetNum(kv, "skin", 0));
 							PushArrayCell(gunGive, KvGetNum(kv, "give_on_spawn", 1));
 							KvGetString(kv, "give_with_weapon", buffer, 32, "");
 							PushArrayString(gunGiveMasterWeapon, buffer);
 							KvGetString(kv, "bind_to_weapon", buffer, 32, "");
 							PushArrayString(gunBind, buffer);
+							PushArrayCell(gunStuck, KvGetNum(kv, "stuck_to_weapon", 0));
 							PushArrayCell(gunPersistent, KvGetNum(kv, "persistent", 0));
 							KvGetString(kv, "admin_level", buffer, sizeof(buffer), "-1");
 							PushArrayCell(gunAdminLevel, StrEqual(buffer, "-1") ? -1 : ReadFlagString(buffer));
@@ -58,25 +61,10 @@ loadConfig()
 							KvGetString(kv, "scope_sound_off", buffer, sizeof(buffer), "");
 							PushArrayString(gunScopeSoundOff, buffer);
 
-							KvGetString(kv, "fof_base", buffer, sizeof(buffer), "");
-							if (StrEqual(buffer, "pistol", false)) {
-								PushArrayCell(fofBase, FofBase_Pistol);
-							}
-							else if (StrEqual(buffer, "melee", false)) {
-								PushArrayCell(fofBase, FofBase_Melee);
-							}
-							else if (StrEqual(buffer, "large", false)) {
-								PushArrayCell(fofBase, FofBase_Large);
-							}
-							else if (StrEqual(buffer, "zoom", false)) {
-								PushArrayCell(fofBase, FofBase_Zoom);
-							}
-							else if (StrEqual(buffer, "boom", false)) {
-								PushArrayCell(fofBase, FofBase_Boom);
-							} else {
-								PrintToServer("Error reading fof base, defaulting to pistol");
-								PushArrayCell(fofBase, FofBase_Pistol);
-							}
+							KvGetString(kv, "fof_base", buffer, sizeof(buffer), "weapon_coltnavy");
+							PushArrayString(fofBase, buffer);
+
+							PushArrayCell(useDynamic, KvGetNum(kv, "use_prop", 1));
 							
 							KvGetString(kv, "weapon_type", buffer, sizeof(buffer), "");
 
@@ -178,7 +166,6 @@ loadConfig()
 						}
 					}
 					delete kv;
-					PrintToServer("ENDING LOAD OF %s", filename);
 				}
 			}
 		}

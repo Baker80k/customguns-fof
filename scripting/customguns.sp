@@ -7,8 +7,8 @@
 #include <customguns/activity_list>
 #include <customguns/drawingtools>
 #include <customguns/const>
-#include <customguns/stocks>
 #include <customguns/globals>
+#include <customguns/stocks>
 
 #include <customguns/styles>
 #include <customguns/hooks>
@@ -23,7 +23,7 @@ public Plugin myinfo =
 {
 	name = "Custom guns",
 	author = "Alienmario",
-	description = "Custom guns plugin for HL2DM",
+	description = "Custom guns plugin for FoF",
 	version = PLUGIN_VERSION
 };
 
@@ -42,6 +42,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, err_max)
 	CreateNative("CG_GetShootPosition", Native_GetShootPosition);
 	CreateNative("CG_RemovePlayerAmmo", Native_RemovePlayerAmmo);
 	CreateNative("CG_RadiusDamage", Native_RadiusDamage);
+	CreateNative("CG_DropWeapon", Native_DisarmWeapon);
 
 	return APLRes_Success;
 }
@@ -111,7 +112,10 @@ public int Native_PlayActivity(Handle plugin, numParams)
 public int Native_PlayPrimaryAttack(Handle plugin, numParams)
 {
 	int weapon = GetNativeCell(1);
+	int client = GetOwner(weapon);
+	int prop_ent = dynamicProps[client];
 	SDKCall(CALL_SendWeaponAnim, weapon, ACT_VM_PRIMARYATTACK);
+	SDKCall(CALL_SendViewModelAnim, weapon, ACT_VM_PRIMARYATTACK); // added to make weapon animation play, though flikers a little
 	float curtime = GetGameTime();
 	float seqDuration = GetEntPropFloat(weapon, Prop_Send, "m_flTimeWeaponIdle") - curtime;
 	SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", curtime + seqDuration);
@@ -140,6 +144,15 @@ public Native_RadiusDamage(Handle plugin, numParams)
 	float origin[3];
 	GetNativeArray(6, origin, sizeof(origin));
 	RadiusDamageHack(GetNativeCell(1), GetNativeCell(2), GetNativeCell(3), GetNativeCell(4), GetNativeCell(5), origin, GetNativeCell(7), GetNativeCell(8));
+}
+
+public Native_DisarmWeapon(Handle plugin, numParams)
+{
+	int weapon = GetNativeCell(1);
+	int client = GetNativeCell(2);
+
+	
+	
 }
 
 public OnPluginStart()
@@ -340,6 +353,8 @@ public OnPluginStart()
 		PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "Weapon_ShootPosition");
 		PrepSDKCall_SetReturnInfo(SDKType_Vector, SDKPass_ByValue);
 		CALL_ShootPosition = EndPrepSDKCall();
+
+
 	}
 
 	CloseHandle(gamedata);
@@ -352,8 +367,10 @@ public OnPluginStart()
 	gunNames = CreateArray(32);
 	gunModels = CreateArray(PLATFORM_MAX_PATH);
 	gunSkin = CreateArray();
+	gunViewmodels = CreateArray(PLATFORM_MAX_PATH);
 	gunType = CreateArray();
-	fofBase = CreateArray();
+	fofBase = CreateArray(32);
+	useDynamic = CreateArray();
 	gunDmg = CreateArray();
 	gunAnimPrefix = CreateArray(32);
 	gunType = CreateArray();
@@ -372,6 +389,7 @@ public OnPluginStart()
 	gunGive = CreateArray();
 	gunGiveMasterWeapon = CreateArray(32);
 	gunBind = CreateArray(32);
+	gunStuck = CreateArray();
 	gunFireLoopFix = CreateArray();
 	gunFireLoopLength = CreateArray();
 	gunFireVisible = CreateArray();
@@ -412,6 +430,7 @@ public OnPluginStart()
 	RegAdminCmd("sm_customguns", CustomGun, ADMFLAG_ROOT, "Spawns a custom gun by classname");
 	RegConsoleCmd("sm_gunmenu", ShowStyleMenu, "Opens customguns wheel style selector");
 	RegAdminCmd("sm_seqtest", SeqTest, ADMFLAG_ROOT, "Viewmodel sequence test");
+	RegAdminCmd("cg_test", CGTest, ADMFLAG_ROOT, "Test functionality");
 
 	for (int i = 1; i <= MaxClients; i++)
 	{
@@ -537,8 +556,9 @@ public OnClientPutInServer(int client)
 		SDKHook(client, SDKHook_WeaponSwitch, OnWeaponSwitch);
 		SDKHook(client, SDKHook_WeaponSwitchPost, OnWeaponSwitchPost);
 		SDKHook(client, SDKHook_WeaponEquipPost, OnWeaponEquipPost);
-		//SDKHook(client, SDKHook_PostThinkPost, OnPostThinkPost); Hooks for potential prediction fix, see hooks.inc for more
+		//SDKHook(client, SDKHook_PostThinkPost, OnPostThinkPost); //Hooks for potential prediction fix, see hooks.inc for more
 		//SDKHook(client, SDKHook_ThinkPost, OnThinkPost);
+		SDKHook(client, SDKHook_WeaponCanSwitchTo, WeaponCanSwitchTo);
 		DHookEntity(DHOOK_FireBullets, false, client);
 		DHookEntity(DHOOK_TranslateActivity, false, client);
 		DHookEntity(DHOOK_BumpWeapon, false, client);
@@ -576,7 +596,17 @@ public void OnSpawn(Handle event, const char[] name, bool dontBroadcast)
 	int client = GetClientOfUserId(GetEventInt(event, "userid"));
 	if (!IsFakeClient(client))
 	{
+		
 		selectedGunIndex[client] = -1;
+		stuckWeapon[client] = -1;
+		if (inventory[client])
+		{
+			ClearArray(inventory[client]);
+			ClearArray(inventoryWheel[client]);
+			ClearArray(inventoryAnimScale[client]);
+			ClearArray(inventoryAmmo[client]);
+			ClearArray(inventoryAmmoType[client]);
+		}
 		if (GetConVarBool(customguns_autogive))
 		{
 			addSpawnWeapons(client);
@@ -585,6 +615,36 @@ public void OnSpawn(Handle event, const char[] name, bool dontBroadcast)
 			CreateTimer(1.0, tGiveCustomGun, GetEventInt(event, "userid"), TIMER_FLAG_NO_MAPCHANGE);
 		}
 	}
+}
+
+public Action WeaponCanSwitchTo(int client, int weapon) {
+	char sSwitchingWeapon[32];
+	if (!IsValidEntity(weapon)) {
+		PrintToServer("Stuck! Invalid");
+		return Plugin_Handled;
+	}
+	GetEntityClassname(weapon, sSwitchingWeapon, sizeof(sSwitchingWeapon));
+	PrintToServer("Switching to Weapon %s", sSwitchingWeapon);
+	int targetWeapon = stuckWeapon[client];
+	if (targetWeapon != -1) {
+		char sTargetWeapon[32];
+		GetEntityClassname(targetWeapon, sTargetWeapon, sizeof(sTargetWeapon));
+		PrintToServer("Target weapon %s", sTargetWeapon);
+		if (!StrEqual(sSwitchingWeapon, sTargetWeapon, false)) {
+			PrintToServer("Stopped weapon switch!")
+			return Plugin_Handled;
+		}
+	}
+	return Plugin_Continue;
+	// if (stuckWeapon[client] == -1) {
+	// 	stuckWeapon[client] = 0;
+	// 	PrintToServer("Handled");
+	// 	return Plugin_Handled;
+	// } else {
+	// 	stuckWeapon[client] = -1;
+	// 	PrintToServer("Continued");
+	// 	return Plugin_Continue;
+	// }
 }
 
 public void OnDeath(Handle event, const char[] name, bool dontBroadcast)
@@ -679,28 +739,11 @@ int spawnGun(int index, const float origin[3] = NULL_VECTOR)
 	// basehlcombatweapon : pretty good, but overshadowing with other weapons at slot 0,0
 	// weapon_cubemap : also good, but does not show stock ammo of player (pesky cubemap has -1 clips and no ammotype on client by default)
 	// int ent = CreateEntityByName("weapon_cubemap");
-	FofBase fofbase = GetArrayCell(fofBase, index);
-	PrintToServer("Fofbase: %d", fofbase)
-	int ent = -1;
-	if (fofbase == FofBase_Pistol) {
-		ent = CreateEntityByName("weapon_coltnavy");
-		PrintToServer("Pistol selected, %d", ent);
-	}
-	else if (fofbase == FofBase_Melee) {
-		ent = CreateEntityByName("weapon_axe");
-		PrintToServer("Melee selected, %d", ent);
-	}
-	else if (fofbase == FofBase_Large) {
-		ent = CreateEntityByName("weapon_shotgun");
-	}
-	else if (fofbase == FofBase_Zoom) {
-		ent = CreateEntityByName("weapon_sharps");
-	}
-	else if (fofbase == FofBase_Boom) {
-		ent = CreateEntityByName("weapon_dynamite");
-	} else {
-		PrintToServer("Error, entity is %d", ent);
-	}
+	char fofbase[32];
+	GetArrayString(fofBase, index, fofbase, sizeof(fofbase));
+	PrintToServer("Fofbase: %s", fofbase)
+	int ent = CreateEntityByName(fofbase);
+	
 	PrintToServer("Entity: %d", ent);
 
 	if (ent != -1)
@@ -711,18 +754,12 @@ int spawnGun(int index, const float origin[3] = NULL_VECTOR)
 		DHookEntity(DHOOK_Holster, true, ent);
 		DHookEntity(DHOOK_GetDefaultClip1, true, ent);
 
-		if (fofBase == FofBase_Melee) {
-			DHookEntity(DHOOK_SecondaryAttack, true, ent);
-			DHookEntity(DHOOK_Drop, true, ent);
-		}
-		else {
-			DHookEntity(DHOOK_SecondaryAttack, false, ent);
-			DHookEntity(DHOOK_Drop, false, ent);
-		}
+		DHookEntity(DHOOK_SecondaryAttack, false, ent);
+		DHookEntity(DHOOK_Drop, false, ent);
 		
-
 		if (guntype == GunType_Bullet)
 		{
+			PrintToServer("Bullet Type");
 			DHookEntity(DHOOK_GetFireRate, false, ent);
 			DHookEntity(DHOOK_AddViewKick, false, ent);
 			DHookEntity(DHOOK_ReloadOrSwitchWeapons, true, ent);
@@ -742,6 +779,7 @@ int spawnGun(int index, const float origin[3] = NULL_VECTOR)
 		}
 		else if (guntype == GunType_Throwable)
 		{
+			PrintToServer("Throwable Type");
 			DHookEntity(DHOOK_ItemPostFrame, false, ent);
 			DHookEntity(DHOOK_PrimaryAttack, false, ent);
 			DHookEntity(DHOOK_Operator_HandleAnimEvent, false, ent);
@@ -751,13 +789,19 @@ int spawnGun(int index, const float origin[3] = NULL_VECTOR)
 			if (GetArrayCell(gunCustomKeepAmmo, index))
 			{
 				// game managed ammo and attack functions
+				PrintToServer("Custom Type, Game-Managed Ammo");
 				DHookEntity(DHOOK_ItemPostFrame, false, ent);
 				DHookEntity(DHOOK_PrimaryAttack, false, ent);
 				DHookEntity(DHOOK_ReloadOrSwitchWeapons, true, ent);
 			}
 			else {
 				// plugin managed ammo, attack forwards called manually
+				PrintToServer("Custom Type, Plugin-Managed Ammo");
 				DHookEntity(DHOOK_ItemPostFrame, true, ent);
+				// added in an attempt to stop the base weapon's attack playing
+				DHookEntity(DHOOK_PrimaryAttack, false, ent);
+				DHookEntity(DHOOK_WeaponSound, false, ent);
+				DHookEntity(DHOOK_ItemPostFramePost, false, ent);
 			}
 		}
 
@@ -837,6 +881,62 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
 
 		// check scope
 		ScopeThink(client, buttons, gunIndex, open[client]);
+		
+		// TODO: this shouldn't need to run every frame
+		if (IsPlayerAlive(client)) {
+			int clientDynamic = dynamicProps[client];
+			if (clientDynamic != -1) {
+				setViewmodelVisible(client, false);
+			} else {
+				setViewmodelVisible(client, true);
+			}
+		}
+
 	}
+
 	return Plugin_Continue;
+}
+
+public Action CGTest(int client, int args)
+{
+	setViewmodelVisible(client, false);
+	return CreateFakeViewmodel(client, args);
+}
+
+public Action CreateFakeViewmodel(int client, int args)
+{
+	int prop = CreateEntityByName("prop_dynamic_override");
+
+	DispatchKeyValue(prop, "model", "models/weapons/v_bigiron.mdl");
+	DispatchKeyValue(prop, "disablereceiveshadows", "1");
+	DispatchKeyValue(prop, "disableshadows", "1");
+	DispatchKeyValue(prop, "solid", "0");
+	
+	DispatchSpawn(prop);
+
+	SetEntityMoveType(prop, MOVETYPE_NONE); // Needed to animate
+
+	int viewmodel = GetEntPropEnt(client, Prop_Data, "m_hViewModel", 0);
+
+	bool check;
+	SetVariantString("!activator");
+	check = AcceptEntityInput(prop, "SetParent", viewmodel);
+	if (check) {
+		PrintToServer("Parented prop to viewmodel");
+	}
+	float vPos[3];
+	GetEntPropVector(viewmodel, Prop_Send, "m_vecOrigin", vPos);
+	PrintToServer("Viewmodel is at %d, %d, %d", vPos[0], vPos[1], vPos[2]);
+	float vOffsets[3] = {0.0,100.0,0.0};
+	AddVectors(vPos, vOffsets, vPos);
+	TeleportEntity(prop, vPos, NULL_VECTOR, NULL_VECTOR);
+	check = AcceptEntityInput(prop, "SetParentAttachmentMaintainOffset", viewmodel);
+	if (check) {
+		PrintToServer("Parent offset!");
+	}
+	//int EF_BONEMERGE = 0x001; // https://developer.valvesoftware.com/wiki/EF_BONEMERGE
+	//SetEntProp(prop, Prop_Send, "m_fEffects", EF_BONEMERGE); // Also needed to animate
+
+	ReplyToCommand(client, "Created fake viewmodel %d", prop);
+	return Plugin_Handled;
 }

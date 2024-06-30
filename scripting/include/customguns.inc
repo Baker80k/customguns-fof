@@ -143,6 +143,11 @@ native void CG_RemovePlayerAmmo(int client, int weapon, int count = 1);
 native void CG_RadiusDamage(int inflictor, int attacker, float dmg, int dmgType, int weapon, const float origin[3], float radius, int ignoreEntity = -1);
 
 /**
+ * Drops active weapon
+ */
+native void CG_DropWeapon(int weapon);
+
+/**
  * Delays both attacks by specified amount of time, allowing the weapon to 'cooldown' until it can be fired again
  *
  * @param weapon			weapon entity index
@@ -164,6 +169,9 @@ stock void CG_SetNextSecondaryAttack(int weapon, float time)
 {
 	SetEntPropFloat(weapon, Prop_Send, "m_flNextSecondaryAttack", time)
 }
+
+
+
 
 //
 //	See Stocks file for more functions!
