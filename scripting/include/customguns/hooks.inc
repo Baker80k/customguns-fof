@@ -11,7 +11,7 @@ public Action OnWeaponSwitch(client, weapon)
 		return Plugin_Handled;
 	}
 	GetEntityClassname(weapon, sSwitchingWeapon, sizeof(sSwitchingWeapon));
-	PrintToServer("Switching to Weapon %s", sSwitchingWeapon);
+	//PrintToServer("Switching to Weapon %s", sSwitchingWeapon);
 	int targetWeapon = stuckWeapon[client];
 	if (targetWeapon != -1) {
 		if (!IsValidEntity(targetWeapon)) {
@@ -57,7 +57,7 @@ public OnWeaponSwitchPost(client, weapon)
 		return;
 	}
 	GetEntityClassname(weapon, sSwitchingWeapon, sizeof(sSwitchingWeapon));
-	PrintToServer("Switching to Weapon %s", sSwitchingWeapon);
+	//PrintToServer("Switching to Weapon %s", sSwitchingWeapon);
 	int targetWeapon = stuckWeapon[client];
 	if (targetWeapon != -1) {
 		if (!IsValidEntity(targetWeapon)) {
@@ -570,7 +570,7 @@ public MRESReturn PrimaryAttack(int weapon)
 			return MRES_Supercede;
 		}
 	}
-	PrintToServer("Regular Attack");
+	PrintToServer("[CG] Regular Attack");
 	return MRES_Ignored;
 }
 

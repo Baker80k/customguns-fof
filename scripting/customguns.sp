@@ -38,6 +38,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, err_max)
 	CreateNative("CG_PlayActivity", Native_PlayActivity);
 	CreateNative("CG_PlayPrimaryAttack", Native_PlayPrimaryAttack);
 	CreateNative("CG_PlaySecondaryAttack", Native_PlaySecondaryAttack);
+	CreateNative("CG_PlayReload", Native_PlayReload)
 	CreateNative("CG_SetPlayerAnimation", Native_SetPlayerAnimation);
 	CreateNative("CG_GetShootPosition", Native_GetShootPosition);
 	CreateNative("CG_RemovePlayerAmmo", Native_RemovePlayerAmmo);
@@ -134,6 +135,18 @@ public int Native_PlaySecondaryAttack(Handle plugin, numParams)
 	return view_as<int>(seqDuration);
 }
 
+public int Native_PlayReload(Handle plugin, numParams)
+{
+	PrintToServer("[CG] Native_PlayReload")
+	int weapon = GetNativeCell(1);
+	//SDKCall(CALL_SendWeaponAnim, weapon, ACT_VM_RELOAD);
+	float curtime = GetGameTime();
+	float seqDuration = GetEntPropFloat(weapon, Prop_Send, "m_flTimeWeaponIdle") - curtime;
+	SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", curtime + seqDuration);
+	SetEntPropFloat(weapon, Prop_Send, "m_flNextSecondaryAttack", curtime + seqDuration);
+	return view_as<int>(seqDuration);
+}
+
 public Native_RemovePlayerAmmo(Handle plugin, numParams)
 {
 	RemovePlayerAmmo(GetNativeCell(1), GetNativeCell(2), GetNativeCell(3));
@@ -150,9 +163,6 @@ public Native_DisarmWeapon(Handle plugin, numParams)
 {
 	int weapon = GetNativeCell(1);
 	int client = GetNativeCell(2);
-
-	
-	
 }
 
 public OnPluginStart()
@@ -620,11 +630,11 @@ public void OnSpawn(Handle event, const char[] name, bool dontBroadcast)
 public Action WeaponCanSwitchTo(int client, int weapon) {
 	char sSwitchingWeapon[32];
 	if (!IsValidEntity(weapon)) {
-		PrintToServer("Stuck! Invalid");
+		//PrintToServer("Stuck! Invalid");
 		return Plugin_Handled;
 	}
 	GetEntityClassname(weapon, sSwitchingWeapon, sizeof(sSwitchingWeapon));
-	PrintToServer("Switching to Weapon %s", sSwitchingWeapon);
+	//PrintToServer("Switching to Weapon %s", sSwitchingWeapon);
 	int targetWeapon = stuckWeapon[client];
 	if (targetWeapon != -1) {
 		char sTargetWeapon[32];
@@ -636,15 +646,6 @@ public Action WeaponCanSwitchTo(int client, int weapon) {
 		}
 	}
 	return Plugin_Continue;
-	// if (stuckWeapon[client] == -1) {
-	// 	stuckWeapon[client] = 0;
-	// 	PrintToServer("Handled");
-	// 	return Plugin_Handled;
-	// } else {
-	// 	stuckWeapon[client] = -1;
-	// 	PrintToServer("Continued");
-	// 	return Plugin_Continue;
-	// }
 }
 
 public void OnDeath(Handle event, const char[] name, bool dontBroadcast)
@@ -738,7 +739,7 @@ int spawnGun(int index, const float origin[3] = NULL_VECTOR)
 	// weapon_hl2mp_base : the same as above, flickers
 	// basehlcombatweapon : pretty good, but overshadowing with other weapons at slot 0,0
 	// weapon_cubemap : also good, but does not show stock ammo of player (pesky cubemap has -1 clips and no ammotype on client by default)
-	// int ent = CreateEntityByName("weapon_cubemap");
+	//int ent = CreateEntityByName("weapon_cubemap");
 	char fofbase[32];
 	GetArrayString(fofBase, index, fofbase, sizeof(fofbase));
 	PrintToServer("Fofbase: %s", fofbase)

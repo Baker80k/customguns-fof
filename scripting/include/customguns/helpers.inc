@@ -64,7 +64,7 @@ loadConfig()
 							KvGetString(kv, "fof_base", buffer, sizeof(buffer), "weapon_coltnavy");
 							PushArrayString(fofBase, buffer);
 
-							PushArrayCell(useDynamic, KvGetNum(kv, "use_prop", 1));
+							PushArrayCell(useDynamic, KvGetNum(kv, "use_dynamic", 1));
 							
 							KvGetString(kv, "weapon_type", buffer, sizeof(buffer), "");
 

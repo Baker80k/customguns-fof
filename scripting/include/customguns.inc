@@ -117,6 +117,15 @@ native float CG_PlayPrimaryAttack(int weapon);
 native float CG_PlaySecondaryAttack(int weapon);
 
 /**
+ * Plays ACT_VM_RELOAD on the weapon and delays the next attack with the sequence duration
+ *
+ * @param weapon			weapon entity index
+ *
+ * @return					sequence duration
+ */
+native float CG_PlayReload(int weapon);
+
+/**
  * Plays animation on the player's model f.e. PLAYER_ATTACK1 or PLAYER_RELOAD
  *
  * @param client			client index
