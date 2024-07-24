@@ -312,6 +312,9 @@ public MRESReturn BumpWeapon(int client, Handle hReturn, Handle hParams)
 
 			SDKCall(CALL_CheckRespawn, gun);
 
+			// TODO: Put the old gun's ammo into the new gun
+
+			// Kill the old gun
 			AcceptEntityInput(gun, "kill");
 			DHookSetReturn(hReturn, 1);
 

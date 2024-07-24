@@ -308,6 +308,7 @@ stock bool addToInventoryIndex(int client, int weaponIndex, bool refreshWheel = 
 			else if (refreshWheel) {
 				giveCustomGun(client, selectedGunIndex[client] == -1 ? weaponIndex : -1);
 			}
+
 			return true;
 		}
 	}

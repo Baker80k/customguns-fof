@@ -112,6 +112,7 @@ public int Native_PlayActivity(Handle plugin, numParams)
 
 public int Native_PlayPrimaryAttack(Handle plugin, numParams)
 {
+
 	int weapon = GetNativeCell(1);
 	int client = GetOwner(weapon);
 	int prop_ent = dynamicProps[client];
@@ -139,7 +140,7 @@ public int Native_PlayReload(Handle plugin, numParams)
 {
 	PrintToServer("[CG] Native_PlayReload")
 	int weapon = GetNativeCell(1);
-	//SDKCall(CALL_SendWeaponAnim, weapon, ACT_VM_RELOAD);
+	SDKCall(CALL_SendWeaponAnim, weapon, ACT_VM_RELOAD);
 	float curtime = GetGameTime();
 	float seqDuration = GetEntPropFloat(weapon, Prop_Send, "m_flTimeWeaponIdle") - curtime;
 	SetEntPropFloat(weapon, Prop_Send, "m_flNextPrimaryAttack", curtime + seqDuration);
@@ -720,6 +721,9 @@ stock giveCustomGun(client, int index = -1, bool switchTo = false)
 				SDKCall(CALL_Weapon_Switch, client, ent, 0);
 				CreateTimer(0.1, deploySound, EntIndexToEntRef(ent));
 			}
+			PrintToServer("Attempting to add primary ammo of %d to player", ent);
+			int ammotype = GetEntProp(ent, Prop_Send, "m_iPrimaryAmmoType")
+			GivePlayerAmmo(client, 1, ammotype, true);
 		}
 		else {
 			selectedGunIndex[client] = -1;
