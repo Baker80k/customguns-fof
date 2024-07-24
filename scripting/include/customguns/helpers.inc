@@ -251,7 +251,7 @@ stock bool addToInventory(int client, const char[] weapon, bool refreshWheel = t
 	return addToInventoryIndex(client, getIndex(weapon), refreshWheel, ignoreAdminLevel);
 }
 
-stock bool addToInventoryIndex(int client, int weaponIndex, bool refreshWheel = true, bool ignoreAdminLevel = false)
+stock bool addToInventoryIndex(int client, int weaponIndex, bool refreshWheel = true, bool ignoreAdminLevel = false, int startingAmmo = -1)
 {
 	if (weaponIndex != -1)
 	{
@@ -303,10 +303,10 @@ stock bool addToInventoryIndex(int client, int weaponIndex, bool refreshWheel = 
 
 			if (preferedGunIndex[client] == weaponIndex)
 			{
-				giveCustomGun(client, preferedGunIndex[client], true);
+				giveCustomGun(client, preferedGunIndex[client], true, startingAmmo);
 			}
 			else if (refreshWheel) {
-				giveCustomGun(client, selectedGunIndex[client] == -1 ? weaponIndex : -1);
+				giveCustomGun(client, selectedGunIndex[client] == -1 ? weaponIndex : -1, false, startingAmmo);
 			}
 
 			return true;

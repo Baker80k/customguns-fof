@@ -688,7 +688,7 @@ public Action tGiveCustomGun(Handle timer, any userid)
 ** index = -1 >> give physical weapon if client doesn't have it yet
 ** valid index >> give new weapon of index
 */
-stock giveCustomGun(client, int index = -1, bool switchTo = false)
+stock giveCustomGun(client, int index = -1, bool switchTo = false, int startingAmmo = -1)
 {
 	if (GetArraySize(gunClassNames) > 0)
 	{
@@ -721,9 +721,16 @@ stock giveCustomGun(client, int index = -1, bool switchTo = false)
 				SDKCall(CALL_Weapon_Switch, client, ent, 0);
 				CreateTimer(0.1, deploySound, EntIndexToEntRef(ent));
 			}
-			PrintToServer("Attempting to add primary ammo of %d to player", ent);
+			// This is to allow the weapon owner to switch to the weapon after its clip is depleted
+			//PrintToServer("Attempting to add primary ammo of %d to player", ent);
 			int ammotype = GetEntProp(ent, Prop_Send, "m_iPrimaryAmmoType")
 			GivePlayerAmmo(client, 1, ammotype, true);
+
+			// This is to start the weapon with some amount of ammo
+			if (startingAmmo != -1) {
+				SetEntProp(ent, Prop_Send, "m_iClip1", startingAmmo);
+			}
+
 		}
 		else {
 			selectedGunIndex[client] = -1;

@@ -305,14 +305,14 @@ public MRESReturn BumpWeapon(int client, Handle hReturn, Handle hParams)
 	// Is it custom?
 	if (gunIndex != -1)
 	{
+		// Get the ammo in the bumped gun
+		int oldAmmo = GetEntProp(gun, Prop_Send, "m_iClip1");
+
 		// Can this be added to player's inventory?
-		if (addToInventoryIndex(client, gunIndex))
+		if (addToInventoryIndex(client, gunIndex, true, false, oldAmmo))
 		{
 			// Player put the gun in his inventory
-
 			SDKCall(CALL_CheckRespawn, gun);
-
-			// TODO: Put the old gun's ammo into the new gun
 
 			// Kill the old gun
 			AcceptEntityInput(gun, "kill");
@@ -606,10 +606,10 @@ public MRESReturn Drop(int weapon)
 	if (IsPlayer(client) && isCustom(weapon))
 	{
 		if (selectedGunIndex[client] == -1) {
-			PrintToServer("[CG Hook] Preventing infinite recursion in Drop");
+			//PrintToServer("[CG Hook] Preventing infinite recursion in Drop");
 			return MRES_Ignored;
 		}
-		PrintToServer("[CG] Dropping custom weapon %d", client);
+		PrintToServer("[CG] Dropping custom weapon %d", weapon);
 		clearInventory(client);
 
 		SDKHooks_DropWeapon(client, weapon);
