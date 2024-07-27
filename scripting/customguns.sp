@@ -162,8 +162,10 @@ public Native_RadiusDamage(Handle plugin, numParams)
 
 public Native_DisarmWeapon(Handle plugin, numParams)
 {
-	int weapon = GetNativeCell(1);
-	int client = GetNativeCell(2);
+	int client = GetNativeCell(1);
+	int weapon = GetNativeCell(2);
+	Drop(weapon);
+	FakeClientCommand(client, "use weapon_fists");
 }
 
 public OnPluginStart()

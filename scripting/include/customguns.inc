@@ -153,8 +153,11 @@ native void CG_RadiusDamage(int inflictor, int attacker, float dmg, int dmgType,
 
 /**
  * Drops active weapon
+ * 
+ * @param client	client index
+ * @param weapon 	weapon entity index
  */
-native void CG_DropWeapon(int weapon);
+native void CG_DropWeapon(int client, int weapon);
 
 /**
  * Delays both attacks by specified amount of time, allowing the weapon to 'cooldown' until it can be fired again
