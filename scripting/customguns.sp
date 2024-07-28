@@ -53,7 +53,9 @@ public Native_GiveGun(Handle plugin, numParams)
 	int client = GetNativeCell(1);
 	char classname[32];
 	GetNativeString(2, classname, sizeof(classname));
-	return addToInventory(client, classname, _, GetNativeCell(3));
+	if (IsPlayerAlive(client)) {
+		return addToInventory(client, classname, true, true);
+	}
 }
 
 public Native_ClearInventory(Handle plugin, numParams)
