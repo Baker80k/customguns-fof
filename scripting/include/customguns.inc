@@ -62,11 +62,11 @@ native bool CG_IsClientHoldingCustomGun(int client);
  *
  * @param client			client index
  * @param classname			weapon classname
- * @param ignoreAdminLevel	if true, won't check if user is allowed to own this weapon
+ * @param switchOnGive		if player should immediately switch to this weapon
  *
- * @return					true if succeeded
+ * @return					entity index of new gun if succeeded, -1 on failure
  */
-native bool CG_GiveGun(int client, const char[] classname, bool ignoreAdminLevel = false);
+native int CG_GiveGun(int client, const char[] classname, bool switchOnGive = false);
 
 /**
  * Spawns a custom weapon by classname at location

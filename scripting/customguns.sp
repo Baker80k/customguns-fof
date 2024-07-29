@@ -18,11 +18,13 @@
 #include <customguns/addons_scope>
 
 #define PLUGIN_VERSION "1.7"
+#define CHAT_PREFIX "\x04 CG \x07FFDA00 "
+#define CONSOLE_PREFIX "[CustomGuns] "
 
 public Plugin myinfo =
 {
 	name = "Custom guns",
-	author = "Alienmario",
+	author = "Alienmario, Baker80k",
 	description = "Custom guns plugin for FoF",
 	version = PLUGIN_VERSION
 };
@@ -53,9 +55,15 @@ public Native_GiveGun(Handle plugin, numParams)
 	int client = GetNativeCell(1);
 	char classname[32];
 	GetNativeString(2, classname, sizeof(classname));
+	bool switchOnGive = GetNativeCell(3);
 	if (IsPlayerAlive(client)) {
-		return addToInventory(client, classname, true, true);
+		addToInventory(client, classname, true, true);
+		if (switchOnGive) {
+			// do something eventually
+		}
+		return 1; // TODO: Get the gun's entity index
 	}
+	return -1;
 }
 
 public Native_ClearInventory(Handle plugin, numParams)
@@ -823,6 +831,7 @@ int spawnGun(int index, const float origin[3] = NULL_VECTOR)
 
 		char weapon[32];
 		GetArrayString(gunClassNames, index, weapon, sizeof(weapon));
+		// This is setting the classname to the base weapon
 		DispatchKeyValue(ent, "classname", weapon);
 		DispatchKeyValueFloat(ent, "skin", float(view_as<int>(GetArrayCell(gunSkin, index))));
 		DispatchSpawn(ent);
@@ -915,8 +924,11 @@ public Action OnPlayerRunCmd(client, &buttons, &impulse, float vel[3], float ang
 
 public Action CGTest(int client, int args)
 {
-	setViewmodelVisible(client, false);
-	return CreateFakeViewmodel(client, args);
+	// Get classname of player's active weapon
+	int weapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+	char sWeapon[32];
+	GetClientWeapon(client, sWeapon, sizeof(sWeapon));
+	PrintToServer("%sClient %d holding %s", CONSOLE_PREFIX, client, sWeapon);
 }
 
 public Action CreateFakeViewmodel(int client, int args)
