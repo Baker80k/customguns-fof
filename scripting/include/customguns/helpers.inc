@@ -232,26 +232,26 @@ bool hasCustomWeapon(int client)
 	return false;
 }
 
-void addSpawnWeapons(client)
-{
-	int size = GetArraySize(gunClassNames);
-	for (int i = 0; i < size; i++)
-	{
-		if (GetArrayCell(gunGive, i))
-		{
-			addToInventoryIndex(client, i, false);
-		}
-	}
+// void addSpawnWeapons(client)
+// {
+// 	int size = GetArraySize(gunClassNames);
+// 	for (int i = 0; i < size; i++)
+// 	{
+// 		if (GetArrayCell(gunGive, i))
+// 		{
+// 			addToInventoryIndex(client, i, false);
+// 		}
+// 	}
 
-	generateWheel(client);
+// 	generateWheel(client);
+// }
+
+stock bool addToInventory(int client, const char[] weapon, bool ignoreAdminLevel = false, switchOnGive = false)
+{
+	return addToInventoryIndex(client, getIndex(weapon), ignoreAdminLevel, switchOnGive);
 }
 
-stock bool addToInventory(int client, const char[] weapon, bool refreshWheel = true, bool ignoreAdminLevel = false)
-{
-	return addToInventoryIndex(client, getIndex(weapon), refreshWheel, ignoreAdminLevel);
-}
-
-stock bool addToInventoryIndex(int client, int weaponIndex, bool refreshWheel = true, bool ignoreAdminLevel = false, int startingAmmo = -1)
+stock bool addToInventoryIndex(int client, int weaponIndex, bool ignoreAdminLevel = false, switchOnGive = false, int startingAmmo = -1)
 {
 	if (weaponIndex != -1)
 	{
@@ -296,18 +296,7 @@ stock bool addToInventoryIndex(int client, int weaponIndex, bool refreshWheel = 
 
 			itemPickup(client);
 
-			if (refreshWheel)
-			{
-				generateWheel(client);
-			}
-
-			if (preferedGunIndex[client] == weaponIndex)
-			{
-				giveCustomGun(client, preferedGunIndex[client], true, startingAmmo);
-			}
-			else if (refreshWheel) {
-				giveCustomGun(client, selectedGunIndex[client] == -1 ? weaponIndex : -1, false, startingAmmo);
-			}
+			giveCustomGun(client, selectedGunIndex[client] == -1 ? weaponIndex : -1, switchOnGive, startingAmmo);
 
 			return true;
 		}

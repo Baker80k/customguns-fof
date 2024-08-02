@@ -58,13 +58,24 @@ public Native_GiveGun(Handle plugin, numParams)
 	bool switchOnGive = GetNativeCell(3);
 	if (IsPlayerAlive(client)) {
 		addToInventory(client, classname, true, true);
-		if (switchOnGive) {
-			// do something eventually
-		}
 		return 1; // TODO: Get the gun's entity index
 	}
 	return -1;
 }
+
+// public Action Timer_SwitchToGunOnEquip(Handle timer, DataPack pack) {
+// 	int client;
+// 	int weaponIndex;
+// 	pack.Reset();
+// 	client = pack.ReadCell();
+// 	weaponIndex = pack.ReadCell();
+// 	char fofbase[32];
+// 	GetArrayString(fofBase, weaponIndex, fofbase, sizeof(fofbase));
+// 	char command[64] = "use ";
+// 	StrCat(command, sizeof(command), fofbase);
+// 	FakeClientCommandEx(client, command);
+// 	PrintToServer("Faked client command |%s|", command);
+// }
 
 public Native_ClearInventory(Handle plugin, numParams)
 {
@@ -462,7 +473,6 @@ public OnPluginStart()
 			OnClientPutInServer(i);
 			if (!IsFakeClient(i) && IsPlayerAlive(i))
 			{
-				addSpawnWeapons(i);
 				giveCustomGun(i);
 			}
 		}
@@ -632,7 +642,6 @@ public void OnSpawn(Handle event, const char[] name, bool dontBroadcast)
 		}
 		if (GetConVarBool(customguns_autogive))
 		{
-			addSpawnWeapons(client);
 			giveCustomGun(client);
 			// delay against weapon strippers + allows to equip prefered gun, which might not be in the inventory when spawning
 			CreateTimer(1.0, tGiveCustomGun, GetEventInt(event, "userid"), TIMER_FLAG_NO_MAPCHANGE);
