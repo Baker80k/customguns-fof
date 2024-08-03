@@ -46,6 +46,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, err_max)
 	CreateNative("CG_RemovePlayerAmmo", Native_RemovePlayerAmmo);
 	CreateNative("CG_RadiusDamage", Native_RadiusDamage);
 	CreateNative("CG_DropWeapon", Native_DisarmWeapon);
+	CreateNative("CG_PrintClientDebug", Native_PrintClientDebug);
 
 	return APLRes_Success;
 }
@@ -63,25 +64,11 @@ public Native_GiveGun(Handle plugin, numParams)
 	return -1;
 }
 
-// public Action Timer_SwitchToGunOnEquip(Handle timer, DataPack pack) {
-// 	int client;
-// 	int weaponIndex;
-// 	pack.Reset();
-// 	client = pack.ReadCell();
-// 	weaponIndex = pack.ReadCell();
-// 	char fofbase[32];
-// 	GetArrayString(fofBase, weaponIndex, fofbase, sizeof(fofbase));
-// 	char command[64] = "use ";
-// 	StrCat(command, sizeof(command), fofbase);
-// 	FakeClientCommandEx(client, command);
-// 	PrintToServer("Faked client command |%s|", command);
-// }
-
 public Native_ClearInventory(Handle plugin, numParams)
 {
 	int client = GetNativeCell(1);
 	clearInventory(client, true);
-}
+} 
 
 public Native_SpawnGun(Handle plugin, numParams)
 {
@@ -187,6 +174,51 @@ public Native_DisarmWeapon(Handle plugin, numParams)
 	int weapon = GetNativeCell(2);
 	Drop(weapon);
 	FakeClientCommand(client, "use weapon_fists");
+}
+
+public Native_PrintClientDebug(Handle plugin, numParams) {
+	int client = GetNativeCell(1);
+
+	PrintToChatAll(" --- %sGlobals --- ", CONSOLE_PREFIX);
+	PrintToChatAll("Equipped gun entity: %d", gunEnt[client]);
+	PrintToChatAll("Selected gun index: %d", selectedGunIndex[client]);
+	PrintToChatAll("Viewmodel dynamic prop: %d", dynamicProps[client]);
+	PrintToChatAll("Expected Team: %d, Actual Team: %d", clientTeam[client], GetClientTeam(client));
+
+	PrintToChatAll(" --- %sExpected Weapon Info --- ", CONSOLE_PREFIX);
+	if (selectedGunIndex[client] == -1) {
+		PrintToChatAll("Not using custom weapon");
+	} else {
+		char classname[32];
+		GetArrayString(gunClassNames, selectedGunIndex[client], classname, sizeof(classname));
+		PrintToChatAll("Using weapon %s", classname);
+		char fofbase[32];
+		GetArrayString(fofBase, selectedGunIndex[client], fofbase, sizeof(fofbase));
+		PrintToChatAll("Built on FoF weapon %s", fofbase);
+		int dynamic = GetArrayCell(useDynamic, selectedGunIndex[client]);
+		PrintToChatAll("Using dynamic prop viewmodel? %d", dynamic);
+		GunType guntype = GetArrayCell(gunType, selectedGunIndex[client]);
+		if (guntype == GunType_Bullet) {
+			PrintToChatAll("Bullet Type");
+		} else if (guntype == GunType_Throwable) {
+			PrintToChatAll("Throwable Type");
+		} else if (guntype == GunType_Custom) {
+			PrintToChatAll("Custom Type");
+		} else {
+			PrintToChatAll("UNKNOWN TYPE");
+		}
+	}
+	
+	PrintToChatAll(" --- %sActual Weapon Info --- ", CONSOLE_PREFIX);
+	int weapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+	if (weapon > 0) {
+		char sWeapon[32];
+		GetEntityClassname(weapon, sWeapon, sizeof(sWeapon));
+		PrintToChatAll("Weapon class name: %s", sWeapon);
+	} else {
+		PrintToChatAll("No weapon equipped");
+	}
+
 }
 
 public OnPluginStart()
@@ -589,7 +621,7 @@ public OnClientPutInServer(int client)
 		SDKHook(client, SDKHook_WeaponSwitch, OnWeaponSwitch);
 		SDKHook(client, SDKHook_WeaponSwitchPost, OnWeaponSwitchPost);
 		SDKHook(client, SDKHook_WeaponEquipPost, OnWeaponEquipPost);
-		//SDKHook(client, SDKHook_PostThinkPost, OnPostThinkPost); //Hooks for potential prediction fix, see hooks.inc for more
+		SDKHook(client, SDKHook_PostThinkPost, OnPostThinkPost); //Hooks for potential prediction fix, see hooks.inc for more
 		//SDKHook(client, SDKHook_ThinkPost, OnThinkPost);
 		SDKHook(client, SDKHook_WeaponCanSwitchTo, WeaponCanSwitchTo);
 		DHookEntity(DHOOK_FireBullets, false, client);

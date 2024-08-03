@@ -160,6 +160,13 @@ native void CG_RadiusDamage(int inflictor, int attacker, float dmg, int dmgType,
 native void CG_DropWeapon(int client, int weapon);
 
 /**
+ * Prints debug command for a client
+ * 
+ * @param client	client index
+ */
+native void CG_PrintClientDebug(int client);
+
+/**
  * Delays both attacks by specified amount of time, allowing the weapon to 'cooldown' until it can be fired again
  *
  * @param weapon			weapon entity index
@@ -181,6 +188,8 @@ stock void CG_SetNextSecondaryAttack(int weapon, float time)
 {
 	SetEntPropFloat(weapon, Prop_Send, "m_flNextSecondaryAttack", time)
 }
+
+
 
 
 

@@ -55,7 +55,7 @@ public void PrimaryAttack(int client, int weapon){
 		EmitGameSoundToAll("Weapon_Crowbar.Melee_Hit", weapon);
 		
 		int entityHit = TR_GetEntityIndex();
-		if(entityHit > 0 && (!IsPlayer(entityHit) || GetClientTeam(entityHit) != GetClientTeam(client)) )
+		if(entityHit > 0 && (IsPlayer(entityHit) || GetClientTeam(entityHit) != GetClientTeam(client)) )
 		{
 			char classname[32];
 			GetEntityClassname(entityHit, classname, sizeof(classname));
