@@ -523,6 +523,7 @@ public Action SeqTest(int client, int args)
 	char seq[32];
 	GetCmdArgString(seq, 32);
 	vmSeq(client, StringToInt(seq), 4.0);
+	PrintToServer("Playing Sequence %s", seq);
 	return Plugin_Handled;
 }
 

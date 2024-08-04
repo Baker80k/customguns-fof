@@ -137,7 +137,7 @@ stock void vmSeq(int client, int sequence, float duration)
 {
 #define EF_PARITY_BITS 3
 #define EF_PARITY_MASK ((1 << EF_PARITY_BITS) - 1)
-
+	//PrintToServer("Playing Sequence %d", sequence);
 	int vm = GetEntPropEnt(client, Prop_Send, "m_hViewModel");
 	SetEntProp(vm, Prop_Send, "m_nSequence", sequence);
 	// SetEntProp(vm, Prop_Send, "m_nAnimationParity", (GetEntProp(vm, Prop_Send, "m_nAnimationParity")+1)  & ( (1<<EF_PARITY_BITS) - 1 ));
