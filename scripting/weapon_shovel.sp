@@ -5,7 +5,7 @@
 
 #define CLASSNAME "weapon_shovel"
 #define RANGE 90.0
-#define DAMAGE 50.0
+#define DAMAGE 35.0
 #define PUSH_SCALE 600.0
 #define PUSH_VERTICAL 600.0
 
@@ -48,7 +48,7 @@ public void CG_OnHolster(int client, int weapon, int switchingTo){
 
 public void PrimaryAttack(int client, int weapon){
 	CG_SetPlayerAnimation(client, PLAYER_ATTACK1);
-	CG_PlayActivity(weapon, ACT_VM_HITCENTER);
+	vmSeq(client, 2, COOLDOWN_PRIMARY_FIRE);
 	PrimaryFire(client, weapon);
 }
 

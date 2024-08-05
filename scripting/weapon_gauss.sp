@@ -39,7 +39,7 @@ bool m_bChargeIndicated[MAXPLAYERS+1];
 bool teamplay;
 
 public void OnPluginStart(){
-	sk_plr_dmg_gauss = CreateConVar("sk_plr_dmg_gauss", "30", "Sets the damage that an uncharged shot from the player will deal.");
+	sk_plr_dmg_gauss = CreateConVar("sk_plr_dmg_gauss", "10", "Sets the damage that an uncharged shot from the player will deal.");
 	sk_plr_max_dmg_gauss = CreateConVar("sk_plr_max_dmg_gauss", "200", "Sets the damage a fully charged shot from the player can deal.");
 	sk_plr_push_scale_gauss = CreateConVar("sk_plr_push_scale_gauss", "3.0", "Sets the scale of secondary attack recoil force.");
 }
