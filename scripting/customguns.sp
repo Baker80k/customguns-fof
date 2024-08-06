@@ -46,6 +46,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, err_max)
 	CreateNative("CG_RemovePlayerAmmo", Native_RemovePlayerAmmo);
 	CreateNative("CG_RadiusDamage", Native_RadiusDamage);
 	CreateNative("CG_DropWeapon", Native_DisarmWeapon);
+	CreateNative("CG_FireBullets", Native_FireBullets);
 	CreateNative("CG_PrintClientDebug", Native_PrintClientDebug);
 
 	return APLRes_Success;
@@ -174,6 +175,63 @@ public Native_DisarmWeapon(Handle plugin, numParams)
 	int weapon = GetNativeCell(2);
 	Drop(weapon);
 	FakeClientCommand(client, "use weapon_fists");
+}
+
+public Native_FireBullets(Handle plugin, numParams) {
+	int client = GetNativeCell(1);
+	
+	new Handle:hBulletInfo;
+	// shots
+	WritePackCell(hBulletInfo, 1);
+
+	float shootPos[3];
+	getShootPosition(client, shootPos);
+	WritePackCell(hBulletInfo, shootPos[0]);
+	WritePackCell(hBulletInfo, shootPos[1]);
+	WritePackCell(hBulletInfo, shootPos[2]);
+
+	float shootAngle[3];
+	GetClientEyeAngles(client, shootAngle);
+	WritePackCell(hBulletInfo, shootAngle[0]);
+	WritePackCell(hBulletInfo, shootAngle[1]);
+	WritePackCell(hBulletInfo, shootAngle[2]);
+
+	// spread
+	WritePackCell(hBulletInfo, 0.0);
+	WritePackCell(hBulletInfo, 0.0);
+	WritePackCell(hBulletInfo, 0.0);
+
+	// distance
+	WritePackCell(hBulletInfo, 0.0);
+
+	// ammo type
+	WritePackCell(hBulletInfo, 1);
+
+	// Tracer freq
+	WritePackCell(hBulletInfo, 1);
+
+	// Damage
+	WritePackCell(hBulletInfo, 0.0);
+
+	// Player damage?
+	WritePackCell(hBulletInfo, 1);
+
+	// Flags
+	WritePackCell(hBulletInfo, 0);
+
+	// Damage force scale
+	WritePackCell(hBulletInfo, 0.0);
+
+	// Attacker
+	WritePackCell(hBulletInfo, client);
+
+	// Additional ignore ent?
+	WritePackCell(hBulletInfo, 0);
+
+	// Primary attack
+	WritePackCell(hBulletInfo, false);
+	
+	FireBullets(client, hBulletInfo);
 }
 
 public Native_PrintClientDebug(Handle plugin, numParams) {

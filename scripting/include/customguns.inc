@@ -160,6 +160,13 @@ native void CG_RadiusDamage(int inflictor, int attacker, float dmg, int dmgType,
 native void CG_DropWeapon(int client, int weapon);
 
 /**
+ * Fires bullet in the correct way
+ * 
+ * @param client
+ */
+native void CG_FireBullets(int client);
+
+/**
  * Prints debug command for a client
  * 
  * @param client	client index

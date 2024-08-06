@@ -5,7 +5,7 @@
 
 #define CLASSNAME "weapon_shovel"
 #define RANGE 90.0
-#define DAMAGE 35.0
+#define DAMAGE 25.0
 #define PUSH_SCALE 600.0
 #define PUSH_VERTICAL 600.0
 

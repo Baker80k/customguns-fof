@@ -243,6 +243,7 @@ public MRESReturn FireBullets(int client, Handle hParams)
 		TE_SetupShotgunShot(origin, vecDir, ammoID, GetURandomInt() & 255, shots, client, spread, true, GetArrayCell(gunFireVisible, selectedGunIndex[client]));
 		TE_SendToClient(client);
 	}
+	PrintToServer("Bullets Fired!");
 	return MRES_Ignored;
 }
 
