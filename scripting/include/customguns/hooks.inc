@@ -243,7 +243,70 @@ public MRESReturn FireBullets(int client, Handle hParams)
 		TE_SetupShotgunShot(origin, vecDir, ammoID, GetURandomInt() & 255, shots, client, spread, true, GetArrayCell(gunFireVisible, selectedGunIndex[client]));
 		TE_SendToClient(client);
 	}
-	PrintToServer("Bullets Fired!");
+	// int shots = DHookGetParamObjectPtrVar(hParams, 1, 0, ObjectValueType_Int);
+	// PrintToServer("Bullets Fired! Shots: %d", shots);
+
+	// float origin[3];
+	// DHookGetParamObjectPtrVarVector(hParams, 1, 4, ObjectValueType_Vector, origin);
+	// PrintToServer("Origin: %f %f %f", origin[0], origin[1], origin[2]);
+	// origin = {0.0, 0.0, 0.0}
+	// DHookSetParamObjectPtrVarVector(hParams, 1, 4, ObjectValueType_Vector, {0.0, 0.0, 0.0});
+
+	// float vecDir[3];
+	// DHookGetParamObjectPtrVarVector(hParams, 1, 16, ObjectValueType_Vector, vecDir);
+	// PrintToServer("vecDirShooting %f %f %f", vecDir[0], vecDir[1], vecDir[2]);
+	// vecDir = {0.0, 0.0, 0.0};
+	// DHookSetParamObjectPtrVarVector(hParams, 1, 16, ObjectValueType_Vector, vecDir);
+
+	// float spread = 0.0; // VecSpread and this spread are slightly different
+	// DHookSetParamObjectPtrVarVector(hParams, 1, 28, ObjectValueType_Vector, {0.0, 0.0, 0.0});
+
+	// // distance
+	// DHookSetParamObjectPtrVar(hParams, 1, 40, ObjectValueType_Float, 0.0);
+
+	// // ammo type
+	// int ammoID = DHookGetParamObjectPtrVar(hParams, 1, 44, ObjectValueType_Int);
+	// PrintToServer("Ammo ID: %d", ammoID);
+	// ammoID = 1;
+	// DHookSetParamObjectPtrVar(hParams, 1, 44, ObjectValueType_Int, ammoID);
+
+	// // Tracer
+	// DHookSetParamObjectPtrVar(hParams, 1, 48, ObjectValueType_Int, 1);
+
+	// // Damage
+	// DHookSetParamObjectPtrVar(hParams, 1, 52, ObjectValueType_Float, 0.0);
+
+	// // PlayerDamage
+	// DHookSetParamObjectPtrVar(hParams, 1, 56, ObjectValueType_Int, 1);
+
+	// // Flags
+	// DHookSetParamObjectPtrVar(hParams, 1, 60, ObjectValueType_Int, 0);
+
+	// // Damage Force Scale
+	// DHookSetParamObjectPtrVar(hParams, 1, 64, ObjectValueType_Float, 0.0);
+
+	// int client_ptr = DHookGetParamObjectPtrVar(hParams, 1, 68, ObjectValueType_Int);
+	// PrintToServer("Old Client PTR: %d", client_ptr);
+	// //client_ptr = client;
+	// client_ptr = GetEntityAddress(client);
+	// PrintToServer("New Client PTR: %d", client_ptr);
+	// DHookSetParamObjectPtrVar(hParams, 1, 68, ObjectValueType_Int, client_ptr);
+
+	// // Does nothing
+	// int add_client_ptr = DHookGetParamObjectPtrVar(hParams, 1, 72, ObjectValueType_Int);
+	// PrintToServer("Additional Client PTR: %d", add_client_ptr);
+	// DHookSetParamObjectPtrVar(hParams, 1, 72, ObjectValueType_Int, 0);
+
+	// DHookSetParamObjectPtrVar(hParams, 1, 76, ObjectValueType_Bool, false);
+
+	// // I can fix her...
+	// PrintToServer("Almost...");
+	// //TE_SetupShotgunShot(origin, vecDir, ammoID, GetURandomInt() & 255, shots, client, spread, true, true);
+	// //TE_SendToClient(client);
+	// PrintToServer("Final Call");
+	// return MRES_Ignored;
+	// //return MRES_Supercede; // Completes, but 
+	PrintToServer("Rand!");
 	return MRES_Ignored;
 }
 

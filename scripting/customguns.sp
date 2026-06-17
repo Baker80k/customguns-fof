@@ -862,7 +862,7 @@ int spawnGun(int index, const float origin[3] = NULL_VECTOR)
 	// weapon_hl2mp_base : the same as above, flickers
 	// basehlcombatweapon : pretty good, but overshadowing with other weapons at slot 0,0
 	// weapon_cubemap : also good, but does not show stock ammo of player (pesky cubemap has -1 clips and no ammotype on client by default)
-	//int ent = CreateEntityByName("weapon_cubemap");
+	// int ent = CreateEntityByName("weapon_cubemap");
 	char fofbase[32];
 	GetArrayString(fofBase, index, fofbase, sizeof(fofbase));
 	PrintToServer("Fofbase: %s", fofbase)
@@ -1065,6 +1065,6 @@ public Action CreateFakeViewmodel(int client, int args)
 	//int EF_BONEMERGE = 0x001; // https://developer.valvesoftware.com/wiki/EF_BONEMERGE
 	//SetEntProp(prop, Prop_Send, "m_fEffects", EF_BONEMERGE); // Also needed to animate
 
-	ReplyToCommand(client, "Created fake viewmodel %d", prop);
+	//ReplyToCommand(client, "Created fake viewmodel %d", prop);
 	return Plugin_Handled;
 }

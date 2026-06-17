@@ -579,7 +579,7 @@ stock int swapVM(int client, bool custom, int dynamic, char viewmodel[PLATFORM_M
 		int EF_BONEMERGE = 0x001; // https://developer.valvesoftware.com/wiki/EF_BONEMERGE
 		SetEntProp(prop, Prop_Send, "m_fEffects", EF_BONEMERGE); // Also needed to animate
 		
-		ReplyToCommand(client, "Created fake viewmodel %d", prop);
+		//ReplyToCommand(client, "Created fake viewmodel %d", prop);
 		return prop;
 	}
 }
